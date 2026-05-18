@@ -61,7 +61,16 @@ from .ir_summarizing import IRSummarizingMemory  # noqa: F401, E402
 from .ir_structured_summary import IRStructuredSummary  # noqa: F401, E402
 from .ir_naive_rag import IRNaiveRAGMemory  # noqa: F401, E402
 from .ir_bm25 import IRBM25Memory  # noqa: F401, E402
-from .ir_amem import IRAMemMemory  # noqa: F401, E402
+
+# A-MEM is an optional dependency (sentence-transformers, scikit-learn).
+# Soft-fail so the rest of the registry still loads when it's missing.
+try:
+    from .ir_amem import IRAMemMemory  # noqa: F401, E402
+except ImportError as _e:
+    import logging as _logging
+    _logging.getLogger(__name__).warning(
+        "ir_amem unavailable (pip install -r requirements-amem.txt to enable): %s", _e
+    )
 
 # LightMem is an optional dependency (third_party/LightMem must be installed).
 # Soft-fail so the rest of the registry still loads when it's missing.

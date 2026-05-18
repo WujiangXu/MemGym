@@ -9,7 +9,6 @@ Wraps EmbeddingRetriever from the A-MEM module.
 from typing import Any, Dict, List, Optional
 
 from ..base import BaseMemoryManager, FilteredContext, register_memory_model
-from ..amem.retriever import EmbeddingRetriever
 
 
 class IRNaiveRAGMemory(BaseMemoryManager):
@@ -33,6 +32,15 @@ class IRNaiveRAGMemory(BaseMemoryManager):
         self._question = question
         self.chunk_size = chunk_size
         self.top_k = top_k
+        try:
+            from ..amem.retriever import EmbeddingRetriever
+        except ImportError as e:
+            raise ImportError(
+                "IRNaiveRAGMemory requires the A-MEM optional dependencies "
+                "(sentence-transformers, scikit-learn). Install them with:\n"
+                "  pip install -r requirements-amem.txt\n"
+                f"Original error: {e}"
+            ) from e
         self.retriever = EmbeddingRetriever(model_name=model_name)
         self._all_observations: List[str] = []
 
