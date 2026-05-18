@@ -1,0 +1,25 @@
+# MemGym-IR v2 smoke test -- 5 samples, dry run
+
+output_dir: ./output_ir_smoke
+limit: 50  # load 50 raw instances, filter will reduce to ~5
+
+# Models (not used in dry-run)
+worker_model: bedrock/us.anthropic.claude-haiku-4-5-20251001-v1:0
+verifier_model: bedrock/us.anthropic.claude-sonnet-4-5-20250929-v1:0
+
+# Filter criteria
+min_hops: 3
+min_supporting: 3
+min_answer_length: 2
+min_question_length: 30
+
+# Difficulty
+difficulty_preset: easy
+
+# Token budget
+target_tokens: 10000
+
+# Skip verification in smoke test
+skip_verification: true
+resume: false
+dry_run: true

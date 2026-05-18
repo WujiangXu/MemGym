@@ -1,0 +1,105 @@
+MemGym
+Copyright 2026 MemGym authors
+
+This product includes software developed at the MemGym project,
+licensed under the Apache License, Version 2.0 (see LICENSE).
+
+================================================================================
+Third-party software bundled in this distribution
+================================================================================
+
+The following third-party projects are present as full source under
+third_party/. Each retains its original LICENSE file inside its respective
+subdirectory; that LICENSE file is authoritative. The summary below is
+informational only.
+
+--------------------------------------------------------------------------------
+third_party/LightMem/   (bundled)
+--------------------------------------------------------------------------------
+  Project: LightMem (https://github.com/zjunlp/LightMem)
+  License: MIT — see third_party/LightMem/LICENSE
+  Copyright: 2025 ZJUNLP and LightMem contributors.
+  Used by: LightMem memory backend wired through
+           src/memgym/memory/_lightmem_prompts.py and the IR pipeline.
+
+--------------------------------------------------------------------------------
+third_party/SWE-Bench-Fork/   (bundled, lightly patched)
+--------------------------------------------------------------------------------
+  Project: SWE-bench (https://github.com/princeton-nlp/SWE-bench)
+  License: MIT — see third_party/SWE-Bench-Fork/LICENSE
+  Copyright: 2023 Carlos E. Jimenez, John Yang, Alexander Wettig,
+             Shunyu Yao, Kexin Pei, Ofir Press, Karthik R. Narasimhan.
+  Used by: src/memgym/envs/swe_bench/* for evaluation; targeted spec patches
+           live in patch_swebench_specs() (see commit history).
+
+================================================================================
+Third-party software fetched on demand by install.sh
+================================================================================
+
+These are NOT bundled in this repository. install.sh clones them into
+third_party/ at install time, where they retain their own LICENSE files.
+Listed here for attribution.
+
+  OpenHands           https://github.com/All-Hands-AI/OpenHands           MIT
+                      (with enterprise/ subdirectory under its own license)
+                      Used by: MemoryAwareSWEAgent wrapper and condensation
+                      primitives referenced from src/memgym/memory/
+                      llm_summarizing.py.
+
+  tau2-bench          https://github.com/sierra-research/tau2-bench       MIT
+                      Used by: src/memgym/envs/tau2/* evaluation.
+
+  WebArena            https://github.com/web-arena-x/webarena             Apache-2.0
+                      Used by: src/memgym/envs/webarena/* evaluation.
+
+  LLMLingua-2         https://github.com/microsoft/LLMLingua              MIT
+                      Used by: src/memgym/memory/llmlingua_backend.py.
+
+================================================================================
+In-tree adapters wrapping upstream libraries (no source vendored)
+================================================================================
+
+The following directories under src/memgym/memory/ are MemGym adapters that
+import upstream libraries at runtime (declared in requirements*.txt). The
+adapter code itself is under MemGym's Apache-2.0 license; the upstream
+projects retain their own licenses, listed here for attribution.
+
+  src/memgym/memory/hipporag_core/   — wraps HippoRAG (MIT)
+                                        https://github.com/OSU-NLP-Group/HippoRAG
+  src/memgym/memory/mem0_core/       — wraps Mem0 (Apache 2.0)
+                                        https://github.com/mem0ai/mem0
+  src/memgym/memory/amem/            — wraps A-Mem
+                                        https://github.com/agiresearch/A-mem
+  src/memgym/memory/memorybank_core/ — wraps MemoryBank
+  src/memgym/memory/simplemem_core/  — original adapter (Apache 2.0, MemGym)
+  src/memgym/memory/tau2_bench/      — adapter for tau2-bench (MIT upstream)
+  src/memgym/memory/webarena/        — adapter for WebArena (Apache 2.0 upstream)
+  src/memgym/memory/ir/              — original MemGym-IR memory layer
+
+================================================================================
+Model weights released alongside this repository
+================================================================================
+
+  MemGym/memgym-rm-1p7b
+    Base model: Qwen/Qwen3-1.7B (Apache 2.0), © 2024 Alibaba Cloud.
+    Adapter: QLoRA adapter weights trained by the MemGym authors,
+             released under Apache 2.0.
+    See the model card on HuggingFace for the full citation.
+
+================================================================================
+Dataset attribution
+================================================================================
+
+MemGym dataset repositories on HuggingFace each carry their own LICENSE marker
+in their dataset card README. The MemGym-released datasets are CC-BY-NC-4.0
+unless noted otherwise. The MemGym-DR dataset is composed of research-paper-
+derived synthetic queries (source_dataset = "deep_research") and does NOT
+incorporate Wikipedia-derived content; therefore no CC-BY-SA-4.0 propagation
+applies to the released DR data.
+
+The MemGym-IR data-generation pipeline (src/memgym/pipelines/memgym_ir/)
+produces derivatives of MuSiQue, 2WikiMultihopQA, and HotpotQA, which are
+themselves Wikipedia-derived (CC-BY-SA-4.0). MemGym does not redistribute
+any MemGym-IR-generated data; users who run that pipeline are responsible
+for honoring the upstream Wikipedia CC-BY-SA-4.0 terms in their own
+derivative artifacts.

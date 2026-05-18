@@ -1,0 +1,212 @@
+# Way A — agent-RL on SWE-Gym with Qwen3-8B-Base via VeRL.
+#
+# Two profiles under one file: LoRA (default, r=16 q/k/v/o) and full_ft
+# (no PEFT, all 8B params train). Select via Hydra override:
+#   python -m memgym.training.rl.way_a_verl.train \
+#       --config-name way_a_qwen3_8b +profile=lora
+#   python -m memgym.training.rl.way_a_verl.train \
+#       --config-name way_a_qwen3_8b +profile=full_ft
+#
+# 8-GPU SkyRL recipe: Ray co-locates the FSDP trainer + vLLM rollout
+# actor on the same 8 GPUs. The `tensor_model_parallel_size: 1` keeps
+# vLLM single-shard for our 8B; bump to 2 if friends move to 30B+.
+#
+# This is an **overlay** on top of verl 0.7.1's `ppo_trainer.yaml`,
+# which `way_a_verl/train.py` composes via Hydra's Compose API before
+# merging us in. Don't add a `defaults:` list — that belongs only on
+# the base config.
+
+algorithm:
+  adv_estimator: grpo
+  use_kl_in_reward: false
+  kl_coef: 0.0  # KL is applied inside the actor loss instead
+
+actor_rollout_ref:
+  hybrid_engine: true
+
+  model:
+    path: Qwen/Qwen3-8B-Base
+    # Sequence-packing optimization. verl 0.7.1's
+    # `verl/utils/attention_utils.py:30` hard-imports
+    # `flash_attn.bert_padding.unpad_input` when this is true, so it
+    # requires `pip install flash-attn` even with SDPA elsewhere. V2q
+    # crashed here. Set false for the no-flash-attn smoke; ~1.3-1.8×
+    # slower fwd. Friends on H100/H200 install flash_attn and flip
+    # this back on for the speedup.
+    use_remove_padding: false
+    enable_gradient_checkpointing: true
+    # verl 0.7.1's `_build_model_optimizer` reads
+    #   attn_implementation = override_model_config.get(
+    #       "attn_implementation", "flash_attention_2")
+    # so the default forces a flash_attn install. Probe `dump_attn_config.py`
+    # confirms this is the only knob. Force PyTorch SDPA so the smoke runs in
+    # a venv without flash_attn. ~10-15% slower than FA2 on long ctx; friends
+    # on H100s should drop the override and `pip install flash-attn`.
+    override_config:
+      attn_implementation: sdpa
+
+  actor:
+    strategy: fsdp2
+    use_kl_loss: true
+    kl_loss_coef: 0.01
+    kl_loss_type: low_var_kl
+    clip_ratio: 0.2
+    # ppo_mini_batch_size must divide (train_batch_size * rollout.n) and
+    # be divisible by world_size. With train_batch_size=8 and rollout.n=8
+    # we have 64 trajectories/iter; mini=8 → 8 PPO mini-batches per iter.
+    ppo_mini_batch_size: 8
+    ppo_micro_batch_size_per_gpu: 1
+    optim:
+      lr: 1.0e-5
+      lr_warmup_steps_ratio: 0.03
+      lr_scheduler_type: cosine
+      weight_decay: 0.01
+      # NOTE: verl 0.7.1's FSDPOptimizerConfig is a strict dataclass and
+      # rejects an `optim.lora` block (TypeError: unexpected keyword
+      # 'lora'). Way A on this verl pin runs full fine-tune only; that
+      # matches friends' big-cluster recipe. Re-introduce LoRA support
+      # via `model.lora_rank`/`model.lora_alpha` (verl's actual schema)
+      # if a smaller-cluster path is needed later.
+
+  rollout:
+    name: vllm
+    n: 8                       # group size for GRPO
+    temperature: 1.0
+    top_p: 1.0
+    top_k: -1
+    tensor_model_parallel_size: 1
+    # verl 0.7.1 also enforces this on the rollout subtree (not just
+    # ref). Same SkyRL convention — per-GPU is the cleaner unit.
+    log_prob_micro_batch_size_per_gpu: 1
+    # A100-40GB sizing for the smoke: vLLM at tensor_model_parallel_size=1
+    # loads the full bf16 8B (~16 GB) per rank. With FSDP sharded trainer
+    # + activations + Adam-fp32 master we have ~22 GB free per rank — 0.55
+    # gives vLLM 22 GB total: 16 GB model + 6 GB KV cache. Friends on
+    # H200-141GB / H100-80GB can drop back to 0.4 (more headroom).
+    # V2k crash: ValueError: No available memory for the cache blocks at
+    # 0.4 confirmed the budget is exactly at the vLLM model footprint.
+    gpu_memory_utilization: 0.55
+    # 8 matches our smoke n_instances; 16 was budget-cargo from larger runs.
+    # `max_num_seqs * max_model_len` is the KV-cache upper bound — halving
+    # both knobs ~quadruples the cache headroom.
+    max_num_seqs: 8
+    # 16K = 8K prompt + 8K response is enough for the smoke (full plan-
+    # specified 32K is friend-cluster). `data.max_prompt_length: 8192`
+    # already caps inputs; capping vLLM matches.
+    max_model_len: 16384
+    enforce_eager: false
+    free_cache_engine: true
+    # FSDP→vLLM weight-sync bucket cap. The bucketed_weight_transfer
+    # path requires each tensor to fit in one bucket (no splitting).
+    # Qwen3-8B's embed_tokens is [151936, 4096] fp32 = ~2,489 MB,
+    # which exceeds the default 2048 MB. 4096 fits comfortably and
+    # leaves room for 30B-class friend variants. V2l died here:
+    # AssertionError: ... too large to fit in the bucket.
+    # Probe `dump_rollout_config.py` v2 found this knob lives under
+    # `checkpoint_engine`, not flat (V2m crash). The runtime assertion
+    # message at V2l was misleading about the YAML path.
+    checkpoint_engine:
+      update_weights_bucket_megabytes: 4096
+    multi_turn:
+      enable: true
+      max_assistant_turns: 75
+      tool_config_path: null   # set by train.py at launch from a temp file
+      # `backticks` parses mini-swe-agent's ```bash ... ``` action format.
+      # train.py also sets this at launch in case the YAML is overridden.
+      format: backticks
+      # Self-summarize knobs consumed by ``memgym_tool`` agent loop
+      # (memgym.training.rl.way_a_verl.memgym_agent_loop). The trainable
+      # Qwen3-8B is BOTH the reasoning policy and the summarizer — summary
+      # tokens carry RL gradient (response_mask=1), so GRPO learns what to
+      # keep. Mirrors the OpenHands LLMSummarizingCondenser pattern used at
+      # trajectory-collection time in src/memgym/memory/llm_summarizing.py.
+      #
+      # **Trigger is message-count, not token-count.** The 14K-trajectory
+      # SFT corpus the H.2 summarizer is trained on was produced under
+      # ``len(view) > max_size`` triggering with ``max_size=100`` (env.py
+      # leaves ``max_token_size=None``). Matching the trigger at RL time
+      # keeps the train/SFT invocation distribution aligned.
+      #
+      # NOTE: verl 0.7.1's `MultiTurnConfig` is a strict dataclass and
+      # rejects unknown kwargs (TypeError on `summarize_enable`). The
+      # summarize knobs therefore live in env vars set by train.py, not
+      # under this multi_turn block. See memgym_agent_loop.py __init__.
+      #
+      # Defaults (env-var name → value):
+      #   MEMGYM_SUMMARIZE_ENABLE          = 1     (on)
+      #   MEMGYM_SUMMARIZE_MAX_MESSAGES    = 100   (== OpenHands max_size)
+      #   MEMGYM_SUMMARIZE_TARGET_RATIO    = 0.75  (== condensation_ratio)
+      #   MEMGYM_SUMMARIZE_KEEP_FIRST      = 1     (system prompt only)
+      #   MEMGYM_SUMMARIZE_MAX_TOKENS      = 1024  (cap on summary length)
+      # → target_size=75, events_from_tail=73 post-compaction.
+      #
+      # Smoke override: pass `--summarize-max-messages 20` to train.py to
+      # fire the path inside the smoke's 75-turn cap (A100-40GB at
+      # max_prompt_length=8192 can't host 100 × ~150 tokens before OOM).
+    # NOTE: a previous revision had an `extra_body: {top_k, min_p}` block
+    # here for Qwen3-thinking sampling propagation. verl 0.7.1's
+    # `RolloutConfig` is a strict dataclass and rejects unknown keys
+    # (TypeError: unexpected keyword 'extra_body'). Qwen3-8B-Base is
+    # non-thinking, so dropping the block is a no-op. Friends moving to
+    # a Qwen3-thinking variant should set these via the model-side
+    # generation_config or vllm engine kwargs in their fork.
+
+  ref:
+    # verl 0.7.1's check_mutually_exclusive() requires at least one of
+    # `log_prob_micro_batch_size` (global) or `_per_gpu` (per-rank).
+    # Per-GPU is the SkyRL convention — easier to reason about under
+    # multi-node scaling. 1 keeps memory low for the smoke; friends
+    # can bump to 4 on H100s.
+    log_prob_micro_batch_size_per_gpu: 1
+    fsdp_config:
+      param_offload: true       # offload ref weights to CPU; KL forward only
+
+data:
+  train_files: null              # set at launch by train.py (parquet of instances)
+  val_files: null
+  prompt_key: prompt
+  max_prompt_length: 8192
+  # `verl/utils/torch_functional.py:logprobs_from_logits_v2` materializes
+  # the full [seq_len, vocab_size] logits matrix in bf16 then peaks again
+  # in `F.log_softmax` (same shape, fp32 accum). For Qwen3's vocab=151936:
+  # 32K tokens × 152K × 2B = ~9.3 GB logits + ~9.3 GB softmax = 18.55 GB
+  # peak — V2r OOM'd here on a 40GB A100 already sharing ~22 GB with vLLM
+  # at gpu_memory_utilization=0.55. 4096 fit on V4y's 8-instance smoke
+  # (max_memory_allocated_gb: 19.66; max_memory_reserved_gb: 22.4 — i.e.
+  # already at 97% utilization). V4z (`6cbe79ce`, 24 instances, 2026-04-29)
+  # OOM'd at the same path on a longer rollout draw — the 4K headroom won
+  # the race in V4y but lost it in V4z. 3072 cuts log_softmax peak by ~25%
+  # (~1.74 GB) and keeps the 8K-prompt + 3K-response shape workable for the
+  # smoke. Friends on H100/H200 80GB+ bump back to 32768 for full reasoning
+  # runs (peak budget there is ~50 GB free, no contention).
+  max_response_length: 3072
+  return_raw_chat: true
+  # verl 0.7.1's `ppo_trainer.yaml` defaults this to 1024; with our smoke
+  # at n_instances=8 the dataloader would be empty (asserted in
+  # `RayPPOTrainer._create_dataloader`). Match `n_gpus_per_node` so each
+  # rank sees one prompt per iteration. Friends bump to 256+ at scale —
+  # `train_batch_size % world_size == 0` is the only hard constraint.
+  train_batch_size: 8
+
+trainer:
+  total_epochs: 5
+  total_training_steps: null
+  project_name: memgym_way_a
+  experiment_name: qwen3_8b_lora
+  n_gpus_per_node: 8
+  nnodes: 1
+  save_freq: 50
+  test_freq: 50
+  val_before_train: false
+  default_local_dir: null        # set by train.py from --save-dir
+  rollout_data_dir: null
+
+# NOTE: ``path`` here is documentation only — verl 0.7.1's
+# ``get_custom_reward_fn`` calls ``importlib.util.spec_from_file_location``
+# which requires an absolute file path with ``.py``, not a dotted module
+# path. ``train.py`` (around line 401) overrides this at runtime to
+# ``_reward_mod.__file__``, so the dotted form below is just a hint for
+# anyone reading the YAML to find the source. Audit M4.
+custom_reward_function:
+  path: memgym.training.rl.way_a_verl.reward
+  name: compute_reward

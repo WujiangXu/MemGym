@@ -1,0 +1,31 @@
+# A-mem (Agentic Memory) dependencies
+# Install with: pip install -r requirements-amem.txt
+
+# Core A-mem dependencies
+sentence-transformers>=3.0.0
+scikit-learn>=1.0.0
+rank-bm25>=0.2.0
+nltk>=3.8.0
+
+# HippoRAG (knowledge-graph + Personalized PageRank) — used by both
+# `--method hipporag` (coding-synthetic) and `ir_hipporag` (IR pipeline).
+# Pulls networkx + igraph (PPR), transformers, openai client.
+hipporag>=2.0.0
+
+# SimpleMem (semantic structured compression) — used by both `--method
+# simplemem` (coding-synthetic) and `ir_simplemem` (IR pipeline).
+# Pulls lancedb (~80 MB), pydantic, sqlalchemy.
+simplemem
+
+# Mem0 (LLM extract+update fact memory) — used by both `--method mem0`
+# (coding-synthetic) and `ir_mem0` (IR pipeline). Uses LiteLLM provider
+# under the hood, embeds via HuggingFace, stores facts in local Qdrant.
+mem0ai>=0.1.0
+
+# MemoryBank (vendored Ebbinghaus decay + reinforcement) — algorithm is
+# vendored at memgym/memory/memorybank_core/, so the only runtime deps
+# are sentence-transformers (already pinned above) and numpy.
+numpy>=1.24
+
+# Already in main requirements.txt:
+# litellm, numpy, tqdm

@@ -1,0 +1,23 @@
+# Default research pipeline config
+# Usage: python -m memgym.pipelines.memgym_ir.research_pipeline --config configs/research_default.yaml
+source: research
+topic: "machine learning"
+num_questions: 20
+target_hops: 4
+min_hops: 3
+search_backend: "semantic_scholar+openalex+wikipedia"
+
+# LLM
+worker_model: "bedrock/us.anthropic.claude-haiku-4-5-20251001-v1:0"
+verifier_model: "bedrock/us.anthropic.claude-sonnet-4-5-20250929-v1:0"
+
+# Craft (post-Invariant B: sibling-seeded near-miss replaces
+# adversarial/contradiction synthesis)
+target_tokens: 30000
+near_miss_per_hop: 3
+expand_paragraphs: true
+
+# Calibration
+skip_calibration: false
+
+output_dir: "output_ir/research_default"

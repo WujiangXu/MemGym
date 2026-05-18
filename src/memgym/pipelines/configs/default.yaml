@@ -1,0 +1,34 @@
+# Coding-Synthetic Pipeline Configuration
+
+# Output settings
+output_dir: "./output"
+
+# Model settings
+model: "gpt-5-mini"
+# api_key: null  # Uses OPENAI_API_KEY env var if not set
+
+# Data limits
+limit: null  # Process all instances
+
+# Filter criteria (lowered for more samples)
+filter:
+  min_lines_changed: 5
+  min_fail_to_pass: 1
+  min_hunks: 1
+  min_problem_length: 100
+
+# Generation settings
+generation:
+  use_llm: true
+  distractor_ratio: 0.5  # 50% as many distractors as memory items
+  min_turns: 5
+  max_turns: 10
+
+# Validation settings
+validation:
+  skip_validation: false
+  skip_docker: true  # Docker not available in most environments
+  validate_memory_necessity: true  # Reject instances where last turn leaks the solution
+
+# Checkpointing
+resume: true  # Resume from checkpoints if they exist

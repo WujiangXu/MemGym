@@ -1,0 +1,12 @@
+# Research trajectory generation: science topics
+# Usage: python -m memgym.pipelines.memgym_ir.research_generator --config configs/research_science.yaml
+generation_mode: research
+topic: "science and technology"
+difficulty: medium
+num_questions: 100
+max_steps: 6
+search_tool: ddg+wikipedia
+model: bedrock/us.anthropic.claude-haiku-4-5-20251001-v1:0
+eviction_mode: full_eviction
+notes_budget: 150
+output: output_ir/research_science_instances.jsonl

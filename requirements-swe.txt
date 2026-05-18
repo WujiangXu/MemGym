@@ -1,0 +1,34 @@
+# Requirements for SWE-bench environment
+
+# Install base MemGym requirements first
+-r requirements.txt
+
+# SWE-bench core dependencies (from their pyproject.toml)
+beautifulsoup4
+chardet
+datasets  # For HuggingFace datasets
+docker
+ghapi
+GitPython
+python-dotenv
+requests
+rich
+tenacity
+tqdm
+unidiff
+
+# For inference (optional, from SWE-bench)
+openai  # For OpenAI models
+anthropic  # For Claude models
+tiktoken  # For tokenization
+transformers  # For local models
+jedi  # Code completion
+
+# LiteLLM for flexible backends
+litellm>=1.65.0
+
+# AWS Bedrock support (required for bedrock/ models)
+boto3
+
+# Install SWE-bench package (run from MemGym root):
+# cd third_party/SWE-bench && pip install -e .

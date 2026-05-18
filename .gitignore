@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+*.egg
+.eggs/
+
+# Build / packaging
+build/
+dist/
+wheels/
+pip-wheel-metadata/
+
+# Virtual envs
+.venv/
+venv/
+env/
+.python-version
+
+# Test + coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Type checkers
+.mypy_cache/
+.pyre/
+.pytype/
+.ruff_cache/
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Local artifacts (logs, results, trajectories)
+logs/
+results/
+trajectories/
+output/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Secrets
+.env
+.env.local
+*.pem
+*.key
+
+# Third-party scaffolds (cloned by install.sh on demand)
+third_party/OpenHands/
+third_party/tau2-bench/
+third_party/webarena/
+third_party/llmlingua-2/

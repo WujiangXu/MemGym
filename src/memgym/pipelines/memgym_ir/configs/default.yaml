@@ -1,0 +1,25 @@
+# MemGym-IR v2 default configuration
+
+output_dir: ./output_ir
+limit: null
+
+# Models (Claude via Bedrock)
+worker_model: bedrock/us.anthropic.claude-haiku-4-5-20251001-v1:0
+verifier_model: bedrock/us.anthropic.claude-sonnet-4-5-20250929-v1:0
+
+# Filter criteria
+min_hops: 3
+min_supporting: 3
+min_answer_length: 2
+min_question_length: 30
+
+# Difficulty
+difficulty_preset: medium
+
+# Token budget per instance
+target_tokens: 10000
+
+# Pipeline control
+skip_verification: false
+resume: true
+dry_run: false

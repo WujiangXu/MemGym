@@ -1,0 +1,35 @@
+# Requirements for Tau2-bench environment
+# Install tau2-bench from third_party
+
+# Install base MemGym requirements first
+-r requirements.txt
+
+# Tau2-bench uses these (from their pyproject.toml)
+fs
+rich
+plotly>=6.0.0
+scikit-learn>=1.6.1
+tabulate>=0.9.0
+fastapi>=0.115.11
+uvicorn>=0.34.0
+pydantic-argparse>=0.10.0
+pandas>=2.2.3
+psutil>=7.0.0
+loguru>=0.7.3
+docstring-parser>=0.16
+litellm>=1.65.0
+tenacity>=9.0.0
+matplotlib>=3.10.1
+seaborn>=0.13.2
+redis>=5.2.1
+deepdiff>=8.4.2
+addict>=2.4.0
+PyYAML>=6.0.2
+toml>=0.10.2
+langfuse>=2.60.7
+gymnasium>=1.2.2
+
+# Install tau2-bench package (run from MemGym root):
+# python -m memgym.gym.tau2_bench.install --venv /path/to/venv
+# (clones sierra-research/tau2-bench at pinned SHA into third_party/tau2-bench
+#  then pip installs -e . into the chosen venv. Idempotent — safe to re-run.)

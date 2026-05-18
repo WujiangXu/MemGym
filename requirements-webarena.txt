@@ -1,0 +1,19 @@
+# Requirements for the WebArena (Web GUI) track.
+#
+# Install:
+#     pip install -r requirements-webarena.txt
+#     playwright install --with-deps chromium
+#
+# The webarena-infinity repository itself is cloned on demand by
+#     python -m memgym.gym.webarena.install
+# which also pip-installs the repo's own requirements.txt into the active venv.
+
+playwright>=1.40
+pytest-playwright>=0.4
+
+# litellm drives the agent + summarizer LLM calls (already installed by
+# memgym core, listed here for clarity).
+litellm>=1.40
+
+# boto3 — required for Bedrock-hosted models used in the EC2 runs
+boto3>=1.34

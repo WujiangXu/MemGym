@@ -1,0 +1,16 @@
+# MemGym Core Requirements
+# Minimal dependencies for the framework itself
+
+# Core
+gymnasium>=1.0.0
+numpy>=1.24.0
+tiktoken>=0.5.0  # For token counting
+
+# Trajectory and tracking
+pydantic>=2.0.0
+
+# Optional: LiteLLM for flexible LLM backends (OpenAI, local models, etc.)
+litellm>=1.65.0
+
+# For experiments
+tqdm>=4.65.0

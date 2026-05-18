@@ -1,0 +1,23 @@
+# Academic paper-focused research pipeline
+# Uses all academic search backends for maximum paper coverage
+source: research
+topic: "natural language processing"
+num_questions: 50
+target_hops: 4
+min_hops: 3
+search_backend: "semantic_scholar+openalex+arxiv+pubmed+wikipedia"
+
+# LLM
+worker_model: "bedrock/us.anthropic.claude-haiku-4-5-20251001-v1:0"
+verifier_model: "bedrock/us.anthropic.claude-sonnet-4-5-20250929-v1:0"
+
+# Craft — higher token budget for paper abstracts
+# (post-Invariant B: sibling-seeded near-miss replaces adversarial/contradiction synthesis)
+target_tokens: 40000
+near_miss_per_hop: 4
+expand_paragraphs: true
+
+# Calibration
+skip_calibration: false
+
+output_dir: "output_ir/research_academic"

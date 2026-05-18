@@ -1,0 +1,15 @@
+# Memory-extreme preset: Fictionalized 6-hop instances with full eviction.
+# Targets eviction gap >= 30pp by:
+# - Fictionalizing entities (anti-contamination)
+# - Upgrading 2-hop instances to 6-hop chains
+# - Full eviction with 200-token notes budget
+# - Requiring 3+ memory-required facts per instance
+#
+# Usage:
+#   python -m pipelines.memgym_ir --config pipelines/memgym_ir/configs/memory_extreme.yaml
+#   python -m pipelines.memgym_ir --config pipelines/memgym_ir/configs/memory_extreme.yaml --limit 50
+
+difficulty_preset: memory_extreme
+upgrade_hops: 6
+min_memory_facts: 3
+limit: 100

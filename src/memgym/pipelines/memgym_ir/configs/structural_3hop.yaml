@@ -1,0 +1,10 @@
+# Structural builder: 2WikiMultihopQA, 3+ hops
+# Usage: python -m memgym.pipelines.memgym_ir.build_instances --config configs/structural_3hop.yaml
+generation_mode: structural
+dataset: 2wikimultihop
+min_hops: 3
+limit: 1000
+eviction_mode: full_eviction
+window_size: 1
+notes_budget: 150
+output: output_ir/structural_2wiki_3hop_instances.jsonl

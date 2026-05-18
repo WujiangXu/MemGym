@@ -1,0 +1,14 @@
+# Memory-hard preset with native 3+ hop instances from 2WikiMultihopQA.
+# Does NOT require hop upgrade (2WikiMultihopQA has native 3-5 hop instances).
+# Reduced notes budget (150 tokens) forces meaningful prioritization.
+#
+# Usage:
+#   python -m pipelines.memgym_ir --config pipelines/memgym_ir/configs/memory_hard_3hop.yaml
+#   python -m pipelines.memgym_ir --config pipelines/memgym_ir/configs/memory_hard_3hop.yaml --limit 500
+
+dataset: 2wikimultihop
+difficulty_preset: memory_hard
+min_hops: 3
+min_supporting: 3
+min_memory_facts: 2
+limit: 500
