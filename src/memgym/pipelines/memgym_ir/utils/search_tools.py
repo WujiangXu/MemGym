@@ -10,7 +10,7 @@ from typing import List, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
-# DDG retry settings (EC2 IPs frequently get rate-limited/captcha'd)
+# DDG retry settings (datacenter IPs frequently get rate-limited/captcha'd)
 _DDG_MAX_RETRIES = 3
 _DDG_BACKOFF_BASE = 2  # seconds: 2, 4, 8
 
@@ -18,7 +18,7 @@ _DDG_BACKOFF_BASE = 2  # seconds: 2, 4, 8
 def search_ddg(query: str, num_results: int = 5) -> List[Dict[str, str]]:
     """DuckDuckGo text search via the duckduckgo-search library.
 
-    Retries with exponential backoff on empty results (common on EC2).
+    Retries with exponential backoff on empty results (common on datacenter IPs).
     """
     try:
         from duckduckgo_search import DDGS

@@ -5,7 +5,7 @@ The recipe builds the prompt directly from the pair's own
 strings — no trajectory/CompactionEvent join needed.
 
 Every pair row has these required keys
-(`MemGym/src/memgym/training/augmentation/env_replay.py:125-151`):
+(`src/memgym/training/augmentation/env_replay.py:125-151`):
 
     {
         "instance_id": str,
@@ -33,7 +33,7 @@ Output columns (one JSONL line per pair):
 
 `completion` + `prompt` are the columns TRL ≥1.0 SFTTrainer reads when
 `completion_only_loss=True`; `input` + `target` are preserved for any
-legacy GRPO/evaluator callers.
+legacy evaluator callers.
 """
 from __future__ import annotations
 
@@ -47,10 +47,10 @@ from typing import Iterable, List, Set
 
 logger = logging.getLogger(__name__)
 
-# Default the training phase label pair. Single-token + balanced under Qwen3.5-9B-Base
-# BPE: " Y" -> [783], " N" -> [443]. The answer-hint inside the prompt is
+# Default label pair. Single-token + balanced under Qwen3 BPE:
+# " Y" -> [783], " N" -> [443]. The answer-hint inside the prompt is
 # rebuilt from the label pair so "answer what?" matches "target what?"
-# across the label-axis sweep (Phase A). RESPONSE_PREFIX has no trailing
+# across the label-axis sweep. RESPONSE_PREFIX has no trailing
 # space — the labels carry their own leading space so they stay
 # single-token.
 RESPONSE_PREFIX = "\n\nAnswer:"
@@ -58,7 +58,7 @@ DEFAULT_LABEL_SAFE = " Y"
 DEFAULT_LABEL_HARMFUL = " N"
 
 # Kept as aliases for callers that imported the old names. New code should
-# take labels as explicit arguments (parameterized by Phase A).
+# take labels as explicit arguments via build_prompt_template().
 LABEL_SAFE_STR = DEFAULT_LABEL_SAFE
 LABEL_HARMFUL_STR = DEFAULT_LABEL_HARMFUL
 
@@ -67,7 +67,7 @@ def build_prompt_template(label_safe: str, label_harmful: str) -> str:
     """Render the pair-prompt template with a label-aware answer hint.
 
     The hint mirrors whichever label pair the completion field uses, so
-    that Phase A's yes/no and good/bad sweeps see prompts that match
+    that the yes/no and good/bad label sweeps see prompts that match
     their targets instead of a fixed "Answer Y / N" instruction.
     """
     return (
@@ -88,25 +88,24 @@ SOURCE_MODEL_BY_DIRNAME = {
     "sonnet_fork_gap554_scopedB": "sonnet45",
     "sonnet_fork_diverse500_scopedB": "sonnet45",
     "sonnet_fork_gap554_scopedB_v2": "sonnet45",
-    # Strategy-OOD held-out dirs (Plan v3 §A0 — memory-gain labeling
-    # via `memory_gain_pairs.py`). The `source_model` value encodes the
-    # strategy slice so downstream `per_source_threshold_sweep` and
-    # `audit_cross_model_variance` bucket on it automatically.
+    # Strategy-OOD held-out dirs (memory-gain labeling via
+    # `memory_gain_pairs.py`). The `source_model` value encodes the
+    # strategy slice so downstream `per_source_threshold_sweep` buckets
+    # on it automatically.
     "heldout_sonnet45_structured_250steps": "sonnet45_structured_250steps",
     "heldout_haiku45_structured_ms100":     "haiku45_structured_ms100",
-    # rebuild_strategy_ood_v2 slate (4 sonnet45 strategies, episode-Δr
-    # labeling). See plan v3 §A0.
+    # Strategy-OOD v2 slate (4 sonnet45 strategies, episode-Δr labeling).
     "heldout_sonnet45_structured_ms200":    "sonnet45_structured_ms200",
     "heldout_sonnet45_obs_masking_w100":    "sonnet45_obs_masking_w100",
     "heldout_sonnet45_pipeline_mask":       "sonnet45_pipeline_mask",
     "heldout_sonnet45_none":                "sonnet45_none",
-    # strategy-OOD v2 expansion (5 additional cohorts, Plan v3 §A1 Step 1).
+    # strategy-OOD v2 expansion (5 additional cohorts).
     "heldout_sliding_window_w75":               "sonnet45_sliding_window",
     "heldout_sonnet45_structured_ms400":        "sonnet45_structured_ms400",
     "heldout_sonnet45_structured_ms100_r050":   "sonnet45_structured_r050",
     "heldout_sonnet45_structured_ms100_kf1":    "sonnet45_structured_kf1",
     "heldout_sonnet45_obs_masking_selective":   "sonnet45_obs_masking_selective",
-    # EC2 cohorts added opportunistically (larger n, share baseline reeval).
+    # Extra cohorts added opportunistically (larger n, share baseline reeval).
     "heldout_sonnet45_structured_250steps_ec2": "sonnet45_structured_250steps_ec2",
     "heldout_haiku45_structured_ms100_r075":    "haiku45_structured_ms100_r075",
     # v2 rebuilt cohorts — none baseline (memory=none), episode-Δr labeling.
@@ -246,8 +245,8 @@ def convert_aug_dirs(
 
     `label_safe`/`label_harmful` drive BOTH the `completion` field and
     the answer hint inside the rendered prompt (via
-    `build_prompt_template`). Phase A's label-axis sweep flips only
-    these two strings.
+    `build_prompt_template`). The label-axis sweep flips only these two
+    strings.
 
     Sources are interleaved (not concatenated) so any `limit` cap still
     spans every teacher model. The split is computed once on the fully

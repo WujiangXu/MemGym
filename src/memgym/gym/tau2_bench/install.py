@@ -2,7 +2,7 @@
 Install sierra-research/tau2-bench into ``third_party/tau2-bench`` and
 verify the MemGym integration.
 
-Usage (locally or on EC2 via POST /run-script):
+Usage (locally, or submitted to a remote runner via POST /run-script):
     python -m memgym.gym.tau2_bench.install
 
 What this script does
@@ -94,7 +94,7 @@ def main() -> None:
     verify_cmd = [
         python_exe, "-c",
         # Keep this inline so a failure shows up with full traceback in the
-        # EC2 job log rather than hiding in a sub-script.
+        # remote job log rather than hiding in a sub-script.
         "import sys, traceback\n"
         "try:\n"
         "    import tau2\n"

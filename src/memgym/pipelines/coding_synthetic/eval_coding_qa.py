@@ -124,7 +124,7 @@ def cmd_expand_instances(args):
     # Lazy-build LLM client only if some path actually needs it.
     needs_llm = (
         args.filler_mode in ("llm", "hybrid")
-        or pool is None  # the training phase/3 may still need to LLM-generate distractors
+        or pool is None  # Phase 2/3 may still need to LLM-generate distractors
     )
     client = None
     if needs_llm:
@@ -485,7 +485,7 @@ def main():
     )
     p_eval.add_argument(
         "--ingest-max-calls", type=int, default=3,
-        help="Cap the training phase ingest calls per instance (default 3). The main "
+        help="Cap Phase-1 ingest calls per instance (default 3). The main "
              "knob: at 8-10 memory_files/instance the old per-file loop fired "
              "10+ ingest calls, often hanging on lightmem (2 LLM calls each).",
     )
@@ -520,12 +520,12 @@ def main():
                                "small medium large xl extreme")
     p_expand.add_argument("--filler-mode", type=str, default="local",
                           choices=["local", "llm", "hybrid"],
-                          help="the training phase filler source: local=repo excerpts (no LLM, "
+                          help="Phase-4 filler source: local=repo excerpts (no LLM, "
                                "default), llm=legacy prose, hybrid=local then LLM "
                                "top-up if budget unmet")
     p_expand.add_argument("--use-pool", action="store_true",
                           help="Build cross-instance distractor pool from --input "
-                               "and recycle for the training phase/3 (skips most LLM calls)")
+                               "and recycle for Phase 2/3 (skips most LLM calls)")
     p_expand.add_argument("--pool-from", type=str, default=None,
                           help="Build the distractor pool from a different jsonl "
                                "(e.g. the full verified set when expanding a subset). "

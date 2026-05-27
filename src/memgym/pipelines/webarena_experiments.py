@@ -17,7 +17,7 @@ Codifies two project principles into a single entry point:
    records the locked agent invariants so any sibling run that drifts from
    them can be detected at analysis time.
 
-Typical usage (from the EC2 launcher, not the local box):
+Typical usage (submitted to the remote job launcher, not run on the local box):
 
     from memgym.pipelines.webarena_experiments import ExperimentSpec, run_experiment
 
@@ -36,10 +36,10 @@ Typical usage (from the EC2 launcher, not the local box):
              "max_size": 20, "keep_first": 1, "condensation_ratio": 0.75},
         ],
     )
-    run_experiment(spec, ec2_base_url="http://ec2-...:30000")
+    run_experiment(spec, base_url="http://<runner-host>:30000")
 
 The runner does NOT execute trajectories itself — it submits sibling
-`/run-webarena` jobs to the EC2 launcher, so parallelism, disk layout,
+`/run-webarena` jobs to the remote launcher, so parallelism, disk layout,
 and job-queue etiquette all flow through the same infrastructure the
 rest of the project uses.
 """
@@ -170,7 +170,7 @@ def build_experiment_dir(
             results_root/. If provided, the returned name is guaranteed not
             to collide with any of them — an incrementing suffix (_v2, _v3,
             ...) is appended if necessary. When not provided, the caller is
-            responsible for race-free creation (the EC2 runner that calls
+            responsible for race-free creation (the remote runner that calls
             `run_experiment` currently holds this responsibility).
 
     Returns:
@@ -284,7 +284,7 @@ def should_run_memory_comparison(baseline_summary: Dict[str, Any]) -> tuple[bool
 
 
 # =============================================================================
-# Job submission (EC2 launcher client)
+# Job submission (remote launcher client)
 # =============================================================================
 
 def build_run_payload(

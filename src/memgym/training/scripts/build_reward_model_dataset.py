@@ -1,8 +1,8 @@
 """CLI entry point for the reward-model dataset rebuild.
 
 Thin shim over ``memgym.training.data.reward_model_pairs.main`` so the
-build is callable with the standard scripts/ layout used by other
-training pipelines (`scan_replay_coverage.py`, `train_sft.py`, ...).
+build is callable with the standard scripts/ layout used by the other
+training launchers (e.g. `train_sft.py`).
 
 Usage:
     python -m memgym.training.scripts.build_reward_model_dataset \

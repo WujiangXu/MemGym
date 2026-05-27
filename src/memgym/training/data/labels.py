@@ -3,13 +3,14 @@
 Compares baseline (no memory) and strategy (memory-augmented) trajectories
 to compute per-instance labels and rewards.
 
-Refactored from pipelines/memory_training/build_pairs.py:compute_reward.
+Refactored from the legacy memory_training pipeline (removed in the
+repository reorganization; recoverable from git history).
 
 Usage:
     from memgym.training.data.loader import TrajectoryLoader
     from memgym.training.data.labels import compute_paired_labels
 
-    loader = TrajectoryLoader("ec2_trajectories")
+    loader = TrajectoryLoader("trajectories")
     baseline = loader.load_experiment("train50_sonnet45_baseline")
     strategy = loader.load_experiment("train50_sonnet45_llmsummarizing")
     bl_labels = loader.load_reeval_labels("path/to/baseline_reeval.json")

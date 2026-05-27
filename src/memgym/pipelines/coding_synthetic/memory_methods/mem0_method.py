@@ -1,6 +1,6 @@
 """Mem0 adapter for the coding_synthetic evaluation pipeline.
 
-Wraps `memgym.memory.mem0_core.Mem0System` (shared with the IR
+Wraps `memgym.memory.external.mem0.Mem0System` (shared with the IR
 pipeline's `ir_mem0` backend) behind the `CodingMemoryMethod`
 protocol.
 """
@@ -23,7 +23,7 @@ class Mem0Method:
     ) -> None:
         self._max_ingest_chars = max_ingest_chars
         self._retrieve_k = retrieve_k
-        from memgym.memory.mem0_core import Mem0System
+        from memgym.memory.external.mem0 import Mem0System
 
         self._system = Mem0System(
             llm_model=llm_model,

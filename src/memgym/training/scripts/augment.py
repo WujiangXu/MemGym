@@ -5,13 +5,13 @@ memory contexts and detecting action divergence.
 
 Usage:
     python -m memgym.training.scripts.augment \
-        --strategy-dir ec2_trajectories/train50_sonnet45_llmsummarizing \
+        --strategy-dir trajectories/train50_sonnet45_llmsummarizing \
         --policy-model bedrock/us.anthropic.claude-haiku-4-5-20251001-v1:0 \
         --output augmentation_output/
 
     # Dry run (no API calls, just extract events)
     python -m memgym.training.scripts.augment \
-        --strategy-dir ec2_trajectories/train50_sonnet45_llmsummarizing \
+        --strategy-dir trajectories/train50_sonnet45_llmsummarizing \
         --dry-run
 """
 

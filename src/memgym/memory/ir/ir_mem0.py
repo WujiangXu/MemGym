@@ -9,7 +9,7 @@ similarity search over the resulting fact store.
 from typing import Any, Dict, List, Optional
 
 from ..base import BaseMemoryManager, FilteredContext, register_memory_model
-from ..mem0_core.system import Mem0System
+from ..external.mem0.system import Mem0System
 
 
 class IRMem0Memory(BaseMemoryManager):

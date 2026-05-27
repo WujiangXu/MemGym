@@ -169,7 +169,7 @@ def evaluate_with_eviction(
 
     allow_notes = eviction_policy.allow_notes and strategy != "none"
 
-    # the training phase: Sequential turn processing with note-taking
+    # Phase 1: Sequential turn processing with note-taking
     for t_idx, turn in enumerate(instance.turns):
         visible_docs, visible_start = _build_visible_docs(
             instance, t_idx, eviction_policy,
@@ -206,7 +206,7 @@ def evaluate_with_eviction(
                 "visible_window": f"[{visible_start}, {t_idx}]",
             })
 
-    # the training phase: Final answer with accumulated notes + visible docs
+    # Phase 2: Final answer with accumulated notes + visible docs
     visible_docs, _ = _build_visible_docs(
         instance, len(instance.turns) - 1, eviction_policy,
     )
@@ -230,7 +230,7 @@ def evaluate_with_eviction(
     except json.JSONDecodeError:
         predicted = response.strip()
 
-    # the training phase: Judge the answer
+    # Phase 3: Judge the answer
     if not predicted:
         score_e = 0.0
     else:
@@ -246,7 +246,7 @@ def evaluate_with_eviction(
         )
         score_e = judge_result.get("score", 0.0)
 
-    # the training phase: Compute note quality (fact recall)
+    # Phase 4: Compute note quality (fact recall)
     note_fact_recall = _compute_note_fact_recall(
         accumulated_notes, instance,
     )

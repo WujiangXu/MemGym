@@ -33,7 +33,7 @@ class IRNaiveRAGMemory(BaseMemoryManager):
         self.chunk_size = chunk_size
         self.top_k = top_k
         try:
-            from ..amem.retriever import EmbeddingRetriever
+            from ..external.amem.retriever import EmbeddingRetriever
         except ImportError as e:
             raise ImportError(
                 "IRNaiveRAGMemory requires the A-MEM optional dependencies "

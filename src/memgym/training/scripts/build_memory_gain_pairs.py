@@ -37,7 +37,7 @@ def main() -> int:
     parser.add_argument("--baseline-reeval", type=Path, default=None,
                         help="Optional reeval JSON for the baseline dir; "
                              "needed when the trajectory files don't carry a "
-                             "`resolved` flag (most ec2_trajectories runs).")
+                             "`resolved` flag (most trajectories runs).")
     parser.add_argument("--ood-reeval", type=Path, default=None,
                         help="Same, for the OOD dir.")
     args = parser.parse_args()

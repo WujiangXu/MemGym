@@ -15,8 +15,8 @@ from dataclasses import dataclass
 from memgym.envs.base import BaseMemoryEnvironment, register_env
 from memgym.memory import PassThroughMemoryModel, SummarizationMemoryModel, BaseMemoryModel
 from memgym.agents import SWEReasoningModel, BaseReasoningModel
-from memgym.adapter.trajectory_recorder import TrajectoryRecorder
-from memgym.utility.token_tracker import TokenTracker
+from memgym.utils.trajectory_recorder import TrajectoryRecorder
+from memgym.utils.token_tracker import TokenTracker
 
 
 class SwerexEnvironmentAdapter:
@@ -578,7 +578,7 @@ class SWEMemoryEnv(BaseMemoryEnvironment):
 
         # Patch swebench with SWE-Gym repo specs if needed
         if self._docker_image_source == "swe-gym":
-            from memgym.eval.swegym_specs import patch_swebench_specs
+            from memgym.utils.swegym_specs import patch_swebench_specs
             patch_swebench_specs()
 
         try:

@@ -132,7 +132,7 @@ class TrainingDataset:
 
     Usage:
         ds = TrainingDataset.from_trajectory_dir(
-            "ec2_trajectories/train50_sonnet45_llmsummarizing"
+            "trajectories/train50_sonnet45_llmsummarizing"
         )
         ds.save("training_output/dataset.jsonl")
     """

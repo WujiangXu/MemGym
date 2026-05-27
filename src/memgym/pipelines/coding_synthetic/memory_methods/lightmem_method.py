@@ -16,7 +16,7 @@ for document-based ingestion by:
     Extractor" for User dialogues (Alice/Paris-style examples) which
     silently destroys signal on code/document inputs and was the root
     cause of LightMem scoring below ``truncated``/``prompt`` on
-    coding-synth the training phase. We pass our neutral prompt via the official
+    coding-synth Phase 5. We pass our neutral prompt via the official
     per-call ``METADATA_GENERATE_PROMPT`` argument of
     ``LightMemory.add_memory`` (``lightmem.py:204-211``); the output
     schema (``{source_id, fact}``) is preserved unchanged so the
@@ -26,7 +26,7 @@ This tests LightMEM's core: LLM-based knowledge extraction + metadata
 generation + embedding index + vector retrieval.
 
 Requirements:
-  pip install lightmem  (or add third_party/LightMem to sys.path)
+  pip install lightmem  (Python 3.10/3.11 — upstream pins python<3.12)
   A running or local Qdrant instance, or use Qdrant local file mode.
   OPENAI_API_KEY / OPENAI_API_BASE for the LLM backend, or configure
   litellm proxy for Bedrock.
@@ -34,7 +34,6 @@ Requirements:
 from __future__ import annotations
 
 import os
-import sys
 import tempfile
 import uuid
 from datetime import datetime, timedelta
@@ -46,7 +45,7 @@ from typing import Any, Dict, Optional
 # LightMem through a JSON-over-stdio subprocess in an isolated venv)
 # can import the same canonical text. See
 # ``src/memgym/memory/_lightmem_prompts.py`` for the full rationale.
-from memgym.memory._lightmem_prompts import NEUTRAL_METADATA_PROMPT as _NEUTRAL_METADATA_PROMPT
+from memgym.memory.strategies._lightmem_prompts import NEUTRAL_METADATA_PROMPT as _NEUTRAL_METADATA_PROMPT
 
 
 class LightMemMethod:
@@ -107,19 +106,7 @@ class LightMemMethod:
         self._max_ingest_chars = max_ingest_chars
         self._system = self._create_system()
 
-    def _ensure_lightmem_importable(self) -> None:
-        """Add third_party/LightMem/src to sys.path if not already."""
-        lightmem_src = os.path.join(
-            os.path.dirname(__file__),
-            "..", "..", "..", "..", "..",  # up to repo root
-            "third_party", "LightMem", "src",
-        )
-        lightmem_src = os.path.normpath(lightmem_src)
-        if lightmem_src not in sys.path and os.path.isdir(lightmem_src):
-            sys.path.insert(0, lightmem_src)
-
     def _create_system(self) -> Any:
-        self._ensure_lightmem_importable()
         from lightmem.memory.lightmem import LightMemory
 
         collection = f"memgym_{uuid.uuid4().hex[:8]}"

@@ -151,9 +151,9 @@ import sys
 sys.path.insert(0, 'src')
 
 try:
-    from envs import get_env, list_envs
-    from memory import get_memory_model, list_memory_models
-    from reasoning import get_reasoning_model, list_reasoning_models
+    from memgym.envs import list_envs
+    from memgym.memory import list_memory_models
+    from memgym.agents import list_reasoning_models
     print('✓ MemGym imports successful')
     print(f'  - Environments: {list_envs()}')
     print(f'  - Memory models: {list_memory_models()}')
@@ -207,5 +207,5 @@ fi
 
 echo -e "\n${GREEN}Next steps:${NC}"
 echo "  1. Set API key: export OPENAI_API_KEY='your-key'"
-echo "  2. Run tests: python test/test_reorganization.py"
-echo "  3. Run episode: python scripts/run_episode.py --help"
+echo "  2. Run tests: pytest tests/unit"
+echo "  3. Run episode: python examples/run_episode.py --help"

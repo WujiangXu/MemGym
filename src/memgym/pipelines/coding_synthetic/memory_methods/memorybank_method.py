@@ -1,6 +1,6 @@
 """MemoryBank adapter for the coding_synthetic evaluation pipeline.
 
-Wraps `memgym.memory.memorybank_core.MemoryBankSystem` (shared with the
+Wraps `memgym.memory.external.memorybank.MemoryBankSystem` (shared with the
 IR pipeline's `ir_memorybank` backend) behind the `CodingMemoryMethod`
 protocol.
 """
@@ -22,7 +22,7 @@ class MemoryBankMethod:
     ) -> None:
         self._max_ingest_chars = max_ingest_chars
         self._retrieve_k = retrieve_k
-        from memgym.memory.memorybank_core import MemoryBankSystem
+        from memgym.memory.external.memorybank import MemoryBankSystem
 
         self._system = MemoryBankSystem(
             embedding_model=embedding_model,

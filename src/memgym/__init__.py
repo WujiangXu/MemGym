@@ -81,24 +81,16 @@ from memgym.agents import (
 # =============================================================================
 # Runners (Experiment Utilities)
 # =============================================================================
-# New runners module
 from memgym.runners import (
     BaseRunner,
     SimpleRunner,
     SWERunner,
 )
 
-# Legacy runner module (for backward compatibility)
-from memgym.runner import (
-    EpisodeRunner,
-    TrajectoryCollector,
-)
-
 # =============================================================================
-# Adapters & Utilities
+# Utilities
 # =============================================================================
-from memgym.adapter import TrajectoryRecorder
-from memgym.utility import TokenTracker
+from memgym.utils import TrajectoryRecorder, TokenTracker
 
 # =============================================================================
 # Types
@@ -152,13 +144,10 @@ __all__ = [
     "get_reasoning_model",
     "register_reasoning_model",
     "list_reasoning_models",
-    # Runners (new)
+    # Runners
     "BaseRunner",
     "SimpleRunner",
     "SWERunner",
-    # Runners (legacy)
-    "EpisodeRunner",
-    "TrajectoryCollector",
     # Utilities
     "TrajectoryRecorder",
     "TokenTracker",

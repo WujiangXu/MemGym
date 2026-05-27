@@ -2,8 +2,8 @@
 
 LightMem pins `python >=3.10,<3.12`; our main benchmark venv is 3.13.
 Rather than force-install and cascade downgrades, we run LightMem in an
-isolated uv-managed Python 3.11 venv and talk to it over a JSON-over-stdio
-subprocess (see `lightmem_server.py` and `scripts/setup_lightmem_venv.py`).
+isolated Python 3.10/3.11 venv and talk to it over a JSON-over-stdio
+subprocess (see `lightmem_server.py`).
 
 The adapter:
   - spawns one long-lived subprocess per manager instance,
@@ -29,7 +29,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from ..base import BaseMemoryManager, FilteredContext, register_memory_model
-from .._lightmem_prompts import NEUTRAL_METADATA_PROMPT
+from ..strategies._lightmem_prompts import NEUTRAL_METADATA_PROMPT
 
 
 _DEFAULT_VENV_PATH = Path.home() / ".cache" / "memgym" / "lightmem-venv"
@@ -49,8 +49,8 @@ def _require_venv() -> Path:
     if not py.exists():
         raise RuntimeError(
             f"LightMem venv not found at {_venv_dir()}. "
-            f"Run `python scripts/setup_lightmem_venv.py` first, or "
-            f"set $LIGHTMEM_VENV to an existing venv."
+            f"Create a Python 3.10/3.11 venv, `pip install lightmem` into it, "
+            f"and set $LIGHTMEM_VENV to point at it."
         )
     return py
 

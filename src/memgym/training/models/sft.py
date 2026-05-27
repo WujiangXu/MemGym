@@ -4,11 +4,11 @@ Plain supervised CE on the SAFE/HARMFUL completion
 token via TRL ≥1.0's native `completion_only_loss=True`. Tokenizer
 masks the prompt; loss fires only on the 1-token answer.
 
-Why SFT here (from the recipe):
+Why SFT here:
   * Deterministic ground-truth labels per pair — no scorer indirection.
-  * CE loss is well-defined for every example; no GRPO
+  * CE loss is well-defined for every example; no policy-gradient
     `frac_reward_zero_std → 1.0` failure mode.
-  * Class imbalance (≈88% HARMFUL) hurts SFT less than GRPO because
+  * Class imbalance (≈88% HARMFUL) hurts SFT less than policy-gradient RL because
     each example contributes equally regardless of label; but eval
     must still check per-class F1 before declaring success.
 """

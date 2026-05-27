@@ -26,7 +26,7 @@ class SimpleMemMethod:
     ) -> None:
         self._max_ingest_chars = max_ingest_chars
         self._retrieve_k = retrieve_k
-        from memgym.memory.simplemem_core import SimpleMemBackend
+        from memgym.memory.external.simplemem import SimpleMemBackend
 
         self._system = SimpleMemBackend(
             llm_model=llm_model,

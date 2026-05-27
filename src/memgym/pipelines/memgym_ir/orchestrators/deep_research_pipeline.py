@@ -205,7 +205,7 @@ def scale_to_target(
     """Scale instance to target token count using search-based filler.
 
     Phase A: Fetch real papers from search APIs (fast, free, realistic).
-    the baseline-train phase (legacy, off by default): LLM-generate remaining filler.
+    Phase B (legacy, off by default): LLM-generate remaining filler.
              Disabled because LLM filler re-establishes topic vocabulary,
              inflating score_long_context and leaking answers into the
              no-memory ablation condition.  Use --legacy-llm-filler to
@@ -248,11 +248,11 @@ def scale_to_target(
     else:
         logger.info(f"  Phase A: Skipped (no search backend or ratio=0)")
 
-    # ── the baseline-train phase: LLM-generated filler (legacy, off by default) ──
+    # ── Phase B: LLM-generated filler (legacy, off by default) ──
     # Disabled: LLM filler re-establishes topic vocabulary, inflating
     # score_long_context and leaking answers into no-memory ablation.
     if legacy_llm_filler and remaining > 500:
-        logger.info(f"  the baseline-train phase [legacy]: LLM-filling ~{remaining} remaining tokens")
+        logger.info(f"  Phase B [legacy]: LLM-filling ~{remaining} remaining tokens")
         subtopic_idx = 0
         round_num = 0
         while remaining > 500 and round_num < max_rounds:
@@ -302,7 +302,7 @@ def scale_to_target(
                 break
     elif remaining > 500:
         logger.info(
-            f"  the baseline-train phase: SKIPPED (legacy LLM filler disabled). "
+            f"  Phase B: SKIPPED (legacy LLM filler disabled). "
             f"Under-fill by ~{remaining} tokens — search APIs didn't "
             f"fully cover budget. Instance proceeds at actual size."
         )
@@ -463,17 +463,17 @@ def fictionalize_instance(
     through the context documents and memory notes.
 
     Two-phase approach:
-      the training phase: LLM extracts entities from grounding facts, generates
+      Phase 1: LLM extracts entities from grounding facts, generates
                fictional replacements + rewritten question/answer
-      the training phase: Apply substitutions across all documents via regex
+      Phase 2: Apply substitutions across all documents via regex
                (fast, deterministic, consistent)
     """
-    # the training phase: Extract entities and generate substitution map
+    # Phase 1: Extract entities and generate substitution map
     facts_text = "\n".join(
         f"[{f.fact_id}] {f.content}" for f in instance.grounding_facts
     )
 
-    logger.info("    the training phase: Extracting entities and generating substitutions")
+    logger.info("    Phase 1: Extracting entities and generating substitutions")
 
     # Retry up to 2 times if too few substitutions (< 8), since low counts
     # often leave enough real-world terms for pretraining leakage
@@ -511,7 +511,7 @@ def fictionalize_instance(
     if len(substitutions) > 10:
         logger.info(f"      ... and {len(substitutions) - 10} more")
 
-    # the training phase: Apply substitutions across all text fields
+    # Phase 2: Apply substitutions across all text fields
 
     # Update question and answer — use regex for consistency with facts/docs.
     # LLM-rewritten Q/A may use slightly different fictional terms than the
@@ -578,7 +578,7 @@ def fictionalize_instance(
     instance.transforms_applied.append("fictionalize_v2_entity_number")
 
     logger.info(
-        f"    the training phase: Applied {len(substitutions)} substitutions across "
+        f"    Phase 2: Applied {len(substitutions)} substitutions across "
         f"{doc_count} documents"
     )
 
@@ -1044,7 +1044,7 @@ def main():
                         help="Ratio of filler from search APIs vs LLM "
                              "(1.0=pure search [default], 0.0=pure LLM)")
     parser.add_argument("--legacy-llm-filler", action="store_true",
-                        help="Re-enable the baseline-train phase LLM-generated filler (off by default; "
+                        help="Re-enable Phase B LLM-generated filler (off by default; "
                              "LLM filler leaks topic vocabulary into score_long_context)")
     parser.add_argument("--concurrency", type=int, default=4,
                         help="Number of parallel workers for grow/craft/scale/verify (default 4, use 8-10 for large runs)")

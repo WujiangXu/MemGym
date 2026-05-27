@@ -57,8 +57,8 @@ class MemoryAwareSWEAgent(DefaultAgent):
             env: Environment (from minisweagent.environments)
             memory_manager: MemGym memory manager (BaseMemoryManager)
             verbose: Print step-by-step progress
-            memory_gate: Optional WorldModelGate. When set, every compaction
-                event is scored by the gate's classifier before the compressed
+            memory_gate: Optional gate object exposing ``.gate(...)``. When
+                set, every compaction event is scored before the compressed
                 context reaches the LLM; rejections trigger one bounded
                 re-compaction retry and fall back soft on second rejection.
             **kwargs: Additional config for DefaultAgent
@@ -79,8 +79,8 @@ class MemoryAwareSWEAgent(DefaultAgent):
             # High-water LLM-context tokens from every memory pass.
             # `max_original_tokens` is the pre-filter full conversation size
             # (what the LLM would see without memory); `max_filtered_tokens`
-            # is the post-filter size actually sent to the model. Both are
-            # read by eval_memory_ab.py for the A/B token-cost criterion.
+            # is the post-filter size actually sent to the model. Both
+            # support the A/B token-cost criterion.
             "max_original_tokens": 0,
             "max_filtered_tokens": 0,
         }

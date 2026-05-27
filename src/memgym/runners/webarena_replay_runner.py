@@ -29,7 +29,7 @@ from dataclasses import dataclass, field, asdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from memgym.adapter.trajectory_recorder import TrajectoryRecorder
+from memgym.utils.trajectory_recorder import TrajectoryRecorder
 from memgym.agents.base import BaseAgent
 from memgym.memory import BaseMemoryManager
 

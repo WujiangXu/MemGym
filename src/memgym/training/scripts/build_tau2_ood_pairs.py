@@ -1,4 +1,4 @@
-"""τ2-bench memory-gain OOD pair builder — runs ON EC2 server-side.
+"""τ2-bench memory-gain OOD pair builder (runs server-side).
 
 Walks `results/tau2_bench/<run>/{baseline,memory}/<domain>/<task_id>/`
 for ``_both_`` runs (which execute baseline + memory on the **same**

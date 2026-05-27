@@ -1067,7 +1067,7 @@ def craft_instance(
     # Build search turns
     turns = _build_search_turns(instance, extraction)
 
-    # the training phase: Expand supporting paragraphs into longer article-style documents
+    # Phase 1: Expand supporting paragraphs into longer article-style documents
     if expand_paragraphs and not dry_run:
         for turn in turns:
             for doc in turn.documents:
@@ -1127,14 +1127,14 @@ def craft_instance(
         )
         all_distractors.extend(contradictions)
 
-        # the training phase: Overlapping documents
+        # Phase 2: Overlapping documents
         if overlap_count > 0:
             overlaps = _generate_overlapping_documents(
                 turns, worker_client, overlap_count=overlap_count,
             )
             all_distractors.extend(overlaps)
 
-        # the training phase: Conflicting authority sources
+        # Phase 3: Conflicting authority sources
         if conflicting_sources_count > 0:
             conflicts = _generate_conflicting_sources(
                 instance, facts_data, worker_client,
@@ -1374,7 +1374,7 @@ def craft_from_growth(
             documents=docs,
         ))
 
-    # the training phase: Expand documents to article length (parallel)
+    # Phase 1: Expand documents to article length (parallel)
     # For large target_tokens, expand ALL documents (not just supporting)
     # to create a realistic long-context scenario
     if expand_paragraphs:
@@ -1731,7 +1731,7 @@ async def craft_instance_async(
     grounding_facts = [GroundingFactIR(**f) for f in facts_data]
     turns = _build_search_turns(instance, extraction)
 
-    # the training phase: Expand supporting paragraphs
+    # Phase 1: Expand supporting paragraphs
     if expand_paragraphs:
         expansion_tasks = []
         for turn in turns:

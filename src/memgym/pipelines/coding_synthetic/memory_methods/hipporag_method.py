@@ -23,7 +23,7 @@ class HippoRAGMethod:
     ) -> None:
         self._max_ingest_chars = max_ingest_chars
         self._retrieve_k = retrieve_k
-        from memgym.memory.hipporag_core import HippoRAGSystem
+        from memgym.memory.external.hipporag import HippoRAGSystem
 
         self._system = HippoRAGSystem(
             llm_model=llm_model,

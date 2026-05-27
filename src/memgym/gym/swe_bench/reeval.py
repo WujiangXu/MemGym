@@ -145,7 +145,7 @@ def main():
 
     # Patch swebench with SWE-Gym repo specs if needed
     if args.dataset in ("swe-gym",):
-        from memgym.eval.swegym_specs import patch_swebench_specs
+        from memgym.utils.swegym_specs import patch_swebench_specs
         patch_swebench_specs()
 
     # Call the official SWE-bench evaluation

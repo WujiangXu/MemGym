@@ -2,7 +2,7 @@
 
 The protocol defines the interface that any memory method must implement
 to be used in the coding_synthetic evaluation pipeline. The key design
-choice: the training phase calls ``retrieve(question)`` per QA pair, so methods
+choice: Phase 2 calls ``retrieve(question)`` per QA pair, so methods
 with real retrieval (A-MEM, LightMEM) return *query-specific* context
 while the prompt wrapper always returns the full accumulated notes.
 """
@@ -20,7 +20,7 @@ class CodingMemoryMethod(Protocol):
     """Interface for pluggable memory methods in coding QA evaluation."""
 
     def ingest(self, doc_name: str, doc_content: str, task_prompt: str) -> None:
-        """Process one document during the training phase (sequential reading).
+        """Process one document during Phase 1 (sequential reading).
 
         Called once per document in the order they appear in
         ``instance.memory_files``.  The method may store, index, or
@@ -29,7 +29,7 @@ class CodingMemoryMethod(Protocol):
         ...
 
     def retrieve(self, question: str, task_prompt: str) -> str:
-        """Return context for answering *question* during the training phase.
+        """Return context for answering *question* during Phase 2.
 
         The returned string is injected into the ``{notes}`` slot of
         ``EVICTED_ANSWER_QA_PROMPT_MEMORY_ONLY``.  Methods with real

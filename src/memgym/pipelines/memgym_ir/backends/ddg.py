@@ -1,6 +1,6 @@
 """DuckDuckGo search backend with retry logic and optional URL scraping.
 
-Retries with exponential backoff on empty results (common on EC2 IPs).
+Retries with exponential backoff on empty results (common on datacenter IPs).
 Optionally scrapes full text from result URLs via scraper module.
 """
 

@@ -1,4 +1,4 @@
-"""Unified trajectory loading from ec2_trajectories/.
+"""Unified trajectory loading from trajectories/.
 
 Handles three JSON formats transparently:
   - _training.json : per-step memory data (was_compacted, summary, etc.)
@@ -6,7 +6,7 @@ Handles three JSON formats transparently:
   - .traj.json     : full episode/step structure with metadata
 
 Usage:
-    loader = TrajectoryLoader("/path/to/ec2_trajectories")
+    loader = TrajectoryLoader("/path/to/trajectories")
     trajs = loader.load_experiment("train50_sonnet45_llmsummarizing")
     labels = loader.load_reeval_labels("path/to/reeval_report.json")
 """
@@ -436,10 +436,10 @@ def load_tau2_trajectory(
 # ---------------------------------------------------------------------------
 
 class TrajectoryLoader:
-    """Load trajectories from ec2_trajectories/ directory structure.
+    """Load trajectories from trajectories/ directory structure.
 
     Usage:
-        loader = TrajectoryLoader("/path/to/ec2_trajectories")
+        loader = TrajectoryLoader("/path/to/trajectories")
         trajs = loader.load_experiment("train50_sonnet45_llmsummarizing")
         labels = loader.load_reeval_labels("path/to/reeval_report.json")
     """

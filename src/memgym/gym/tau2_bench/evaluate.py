@@ -15,9 +15,9 @@ Design — why two phases
 The paper claim for the τ²-bench track is *symmetric memory wrapping*
 improves performance. To make that measurement fair:
 
-    1. the training phase (baseline): run the unwrapped tau2 ``LLMAgent`` /
+    1. Phase 1 (baseline): run the unwrapped tau2 ``LLMAgent`` /
        ``UserSimulator`` pair with ``memory_agent=None, memory_user=None``.
-    2. the training phase (memory):  run the SAME agent class + SAME task list +
+    2. Phase 2 (memory):  run the SAME agent class + SAME task list +
        SAME seed, but pass the configured memory manager(s) into
        ``env.run_tau2_episode``.
 
@@ -145,7 +145,7 @@ def config() -> argparse.Namespace:
         help="LLM for NL-assertion evaluation (retail tasks need this). "
              "Defaults to --agent_llm. Tau2 upstream defaults to gpt-4.1 "
              "which requires OPENAI_API_KEY; set this to a Bedrock model "
-             "when running on EC2.",
+             "when running on a remote server.",
     )
 
     # ---- Two-phase orchestration ----

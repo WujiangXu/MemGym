@@ -1,12 +1,12 @@
 """
 Install WebArena-Infinity into the embedded envs directory and set up Playwright.
 
-Usage (on EC2 via POST /run-script):
+Usage (locally, or submitted to a remote runner via POST /run-script):
     python -m memgym.gym.webarena.install
 
 By default this installs into the venv determined by `sys.executable`, which
-matches the EC2 launcher convention: the venv is activated before running, and
-`sys.executable` points at the venv python. On the user's standard EC2 host
+matches the remote-runner convention: the venv is activated before running, and
+`sys.executable` points at the venv python. On a standard remote host
 that is `${VENV_DIR}/bin/python`.
 
 What this script does:
@@ -20,7 +20,7 @@ WebArena-Infinity disk footprint on a fresh install:
 - repo clone: ~50 MB
 - Python deps (playwright, pytest-playwright, fastapi, uvicorn, etc.): ~200 MB
 - Chromium browser binary: ~500 MB
-- Total: well under 1 GB — negligible on the EC2 1.6 TB volume.
+- Total: well under 1 GB — negligible on a typical data volume.
 
 This script is safe to re-run: git clone is skipped if the repo is present,
 pip installs are idempotent, and Playwright's `install chromium` is a no-op
@@ -93,7 +93,7 @@ def main() -> None:
 
     # ---- Step 3: Install Chromium browser binaries ----
     print("\n=== Installing Chromium via `playwright install chromium` ===")
-    # --with-deps installs OS-level dependencies (apt-get); safe on EC2 Ubuntu.
+    # --with-deps installs OS-level dependencies (apt-get); safe on Ubuntu.
     rc = _run([python_exe, "-m", "playwright", "install", "--with-deps", "chromium"], check=False)
     if rc != 0:
         print("WARNING: `playwright install --with-deps chromium` failed. "

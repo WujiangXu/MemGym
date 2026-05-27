@@ -1,6 +1,6 @@
 """Round-trip tests for the tau2 trajectory loader + compaction extractor.
 
-Fixture is a real episode captured from EC2 on 2026-04-15 via
+Fixture is a real episode captured on 2026-04-15 via
 ``Tau2BenchRunner`` (retail task 0, ms10_kf1_kl2_r0.6, memory_side=both).
 The invariants we pin here are the cross-side contract between runner and
 world-memory trainer: event counts and msg_index roles must round-trip

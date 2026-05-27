@@ -237,7 +237,7 @@ def expand_instance(
 
     deficit = target_tokens - current
 
-    # the training phase: Add distractors (roughly 50 tokens each, cheap)
+    # Phase 1: Add distractors (roughly 50 tokens each, cheap)
     max_new_distractors = min(deficit // 50, 25)  # Cap at 25 extra
     new_distractors = []
     if max_new_distractors >= 3:
@@ -262,7 +262,7 @@ def expand_instance(
     for d in all_distractors:
         current += count_tokens(d.content)
 
-    # the training phase: Expand memory file prose if still below target
+    # Phase 2: Expand memory file prose if still below target
     if current < target_tokens:
         remaining_deficit = target_tokens - current
         # Distribute extra words across files

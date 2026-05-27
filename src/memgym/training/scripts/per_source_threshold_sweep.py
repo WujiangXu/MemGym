@@ -1,10 +1,10 @@
-"""Per-source threshold sweep — Phase A.0 of the world-model the training phase plan.
+"""Per-source threshold sweep over the reward-model eval predictions.
 
-The the baseline-train phase cross-source audit found the gate's aggregate SAFE-F1 (0.844
-at t=0.05) is haiku45-dominated: haiku45 = 0.863, gptoss120b = 0.857,
-sonnet45 = 0.719. Before spending 40 min retraining with new labels,
-check whether a per-teacher threshold closes the gap with only
-arithmetic. If yes, we can deploy with per-source t* and skip Phase A/C.
+A cross-source audit found the aggregate SAFE-F1 (0.844 at t=0.05) is
+haiku45-dominated: haiku45 = 0.863, gptoss120b = 0.857, sonnet45 = 0.719.
+Before retraining with new labels, this checks whether a per-teacher
+threshold closes the gap with only arithmetic — if so, we can deploy
+with per-source t* instead.
 
 Protocol:
   * Read the per-row eval dump (eval_results_v2.json).

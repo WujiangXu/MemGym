@@ -6,14 +6,14 @@ from unittest.mock import MagicMock, patch
 
 sys.modules.setdefault("litellm", types.SimpleNamespace(completion=None))
 
-from memgym.memory.adaptive_token_budget import AdaptiveTokenBudgetMemory
+from memgym.memory.strategies.adaptive_token_budget import AdaptiveTokenBudgetMemory
 
 def _msg(role, content):
     return {"role": role, "content": content}
 
 class TestAdaptiveTokenBudgetMemory(unittest.TestCase):
     def setUp(self):
-        self.mock_completion_patcher = patch("memgym.memory.adaptive_token_budget.completion")
+        self.mock_completion_patcher = patch("memgym.memory.strategies.adaptive_token_budget.completion")
         self.mock_completion = self.mock_completion_patcher.start()
 
         self.mock_response = MagicMock()

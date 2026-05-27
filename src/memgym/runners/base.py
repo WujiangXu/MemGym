@@ -13,7 +13,7 @@ import time
 
 from memgym.memory import BaseMemoryManager, PassThroughMemory, FilteredContext
 from memgym.agents import BaseAgent
-from memgym.adapter import TrajectoryRecorder
+from memgym.utils import TrajectoryRecorder
 
 
 class BaseRunner(ABC):

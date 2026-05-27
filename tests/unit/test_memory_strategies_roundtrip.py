@@ -127,7 +127,7 @@ def stub_litellm(monkeypatch):
     not a module reference), so we have to patch each module-level
     symbol individually.
     """
-    from memgym.memory import (
+    from memgym.memory.strategies import (
         adaptive_token_budget,
         llm_summarizing,
         structured_summary,
@@ -135,7 +135,7 @@ def stub_litellm(monkeypatch):
     # `summarizer_backend.completion` is the path NaiveSummarizationMemory
     # uses via LitellmSummarizerBackend. Patching it lets the default
     # backend run end-to-end without network too.
-    from memgym.memory import summarizer_backend
+    from memgym.memory.backends import summarizer_backend
 
     for module in (
         adaptive_token_budget,
@@ -162,7 +162,7 @@ def test_passthrough_returns_full_messages(conversation):
 
 def test_observation_masking_preserves_tool_call_pairs(conversation):
     """Aggressive masking should keep `tool` messages' tool_call_id intact."""
-    from memgym.memory import observation_masking  # noqa: F401 (side-effect registers)
+    from memgym.memory.strategies import observation_masking  # noqa: F401 (side-effect registers)
 
     mem = get_memory_model(
         "observation_masking",
@@ -181,7 +181,7 @@ def test_observation_masking_preserves_tool_call_pairs(conversation):
 
 def test_naive_summarization_uses_injected_backend(conversation):
     """Inject a fake backend so we don't touch litellm at all."""
-    from memgym.memory import naive_summarization  # noqa: F401
+    from memgym.memory.strategies import naive_summarization  # noqa: F401
 
     mem = get_memory_model(
         "naive_summarization",
@@ -194,7 +194,7 @@ def test_naive_summarization_uses_injected_backend(conversation):
 
 def test_llm_summarizing_triggers_on_message_count(conversation, stub_litellm):
     """Triggering when len(view) > max_size produces a compressed view."""
-    from memgym.memory import llm_summarizing  # noqa: F401
+    from memgym.memory.strategies import llm_summarizing  # noqa: F401
 
     mem = get_memory_model(
         "llm_summarizing",
@@ -210,7 +210,7 @@ def test_llm_summarizing_triggers_on_message_count(conversation, stub_litellm):
 
 def test_structured_summary_triggers_on_message_count(conversation, stub_litellm):
     """Structured summary uses litellm function calling under the hood."""
-    from memgym.memory import structured_summary  # noqa: F401
+    from memgym.memory.strategies import structured_summary  # noqa: F401
 
     # max_size=4 with condensation_ratio=0.75 gives events_from_tail=1
     # (target_size=3 - keep_first=1 - 1 summary slot). max_size=3 would
@@ -228,7 +228,7 @@ def test_structured_summary_triggers_on_message_count(conversation, stub_litellm
 
 def test_adaptive_token_budget_triggers_on_token_overflow(conversation, stub_litellm):
     """max_tokens=10 forces the adaptive strategy to summarize the middle."""
-    from memgym.memory import adaptive_token_budget  # noqa: F401
+    from memgym.memory.strategies import adaptive_token_budget  # noqa: F401
 
     mem = get_memory_model(
         "adaptive_token_budget",
@@ -243,7 +243,7 @@ def test_adaptive_token_budget_triggers_on_token_overflow(conversation, stub_lit
 
 def test_sliding_window_summary_runs(conversation, stub_litellm):
     """Sliding window strategy uses an LLM to summarize older turns."""
-    from memgym.memory import sliding_window_summary  # noqa: F401
+    from memgym.memory.strategies import sliding_window_summary  # noqa: F401
 
     mem = get_memory_model(
         "sliding_window",
@@ -256,7 +256,7 @@ def test_sliding_window_summary_runs(conversation, stub_litellm):
 
 def test_pipeline_chains_two_stages(conversation):
     """PipelineMemory threads output of stage 1 into stage 2."""
-    from memgym.memory.pipeline import PipelineMemory
+    from memgym.memory.strategies.pipeline import PipelineMemory
 
     stage1 = PassThroughMemory(max_tokens=4000)
     stage2 = PassThroughMemory(max_tokens=4000)

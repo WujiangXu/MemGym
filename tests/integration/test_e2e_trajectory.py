@@ -133,7 +133,7 @@ class TestE2EObservationMasking(unittest.TestCase):
     """E2E test: record → save → reload → replay with ObservationMaskingMemory."""
 
     def test_e2e_record_save_reload_replay_observation_masking(self):
-        from memgym.memory.observation_masking import ObservationMaskingMemory
+        from memgym.memory.strategies.observation_masking import ObservationMaskingMemory
         from replay_swe_bench import analyze_replay
 
         memory = ObservationMaskingMemory(attention_window=3, keep_first=1)
@@ -171,14 +171,14 @@ class TestE2EObservationMasking(unittest.TestCase):
 class TestE2ENaive(unittest.TestCase):
     """E2E test: record → save → reload → replay with NaiveSummarizationMemory."""
 
-    @patch("memgym.memory.naive_summarization.completion")
+    @patch("memgym.memory.strategies.naive_summarization.completion")
     def test_e2e_record_save_reload_replay_naive(self, mock_completion):
         mock_response = MagicMock()
         mock_response.choices = [MagicMock()]
         mock_response.choices[0].message.content = "Summary of previous steps."
         mock_completion.return_value = mock_response
 
-        from memgym.memory.naive_summarization import NaiveSummarizationMemory
+        from memgym.memory.strategies.naive_summarization import NaiveSummarizationMemory
         from replay_swe_bench import analyze_replay
 
         memory = NaiveSummarizationMemory(max_tokens=200, keep_recent=3)
@@ -213,7 +213,7 @@ class TestE2ENaive(unittest.TestCase):
 class TestE2ECrossStrategyReplay(unittest.TestCase):
     """Record with one strategy, replay through multiple different strategies."""
 
-    @patch("memgym.memory.naive_summarization.completion")
+    @patch("memgym.memory.strategies.naive_summarization.completion")
     def test_e2e_cross_strategy_replay(self, mock_completion):
         mock_response = MagicMock()
         mock_response.choices = [MagicMock()]
@@ -221,8 +221,8 @@ class TestE2ECrossStrategyReplay(unittest.TestCase):
         mock_completion.return_value = mock_response
 
         from memgym.memory.base import PassThroughMemory
-        from memgym.memory.observation_masking import ObservationMaskingMemory
-        from memgym.memory.naive_summarization import NaiveSummarizationMemory
+        from memgym.memory.strategies.observation_masking import ObservationMaskingMemory
+        from memgym.memory.strategies.naive_summarization import NaiveSummarizationMemory
         from replay_swe_bench import analyze_replay
 
         # Record with passthrough (no filtering)
@@ -365,7 +365,7 @@ class TestE2EMultipleEpisodesIsolation(unittest.TestCase):
     """Multiple episodes must be isolated — no state leak between runs."""
 
     def test_e2e_multiple_episodes_isolation(self):
-        from memgym.memory.observation_masking import ObservationMaskingMemory
+        from memgym.memory.strategies.observation_masking import ObservationMaskingMemory
 
         memory = ObservationMaskingMemory(attention_window=3, keep_first=1)
 

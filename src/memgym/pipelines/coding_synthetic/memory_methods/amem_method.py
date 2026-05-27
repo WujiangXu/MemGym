@@ -39,7 +39,7 @@ class AMemMethod:
         self._system = self._create_system()
 
     def _create_system(self) -> Any:
-        from memgym.memory.amem.system import AgenticMemorySystem
+        from memgym.memory.external.amem.system import AgenticMemorySystem
 
         return AgenticMemorySystem(
             model_name=self._embedding_model,

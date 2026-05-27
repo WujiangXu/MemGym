@@ -43,8 +43,8 @@ from memgym.training.data.loader import LoadedTrajectory, TrajectoryLoader
 @dataclass
 class _TriggerEvent:
     """Lightweight stand-in for ``CompactionEvent`` when we only have the
-    ``was_compacted`` rising edge (EC2 ``_training.json`` captures drop the
-    ``summary`` field that ``extract_compaction_events`` keys on).
+    ``was_compacted`` rising edge (server-side ``_training.json`` captures drop
+    the ``summary`` field that ``extract_compaction_events`` keys on).
     """
     step: int
     agent_action: str
@@ -53,7 +53,7 @@ class _TriggerEvent:
 def _action_from_replay(traj: LoadedTrajectory, step: int) -> str:
     """Reconstruct the agent's bash command from `_replay.json` tool_calls.
 
-    EC2-captured ``_training.json`` files leave ``step.action`` empty
+    Agent-captured ``_training.json`` files leave ``step.action`` empty
     because the action lives in the assistant message's ``tool_calls``.
     Map ``step.step=k`` → the k-th assistant message (1-indexed; mirrors
     what the agent loop emits). Concatenate every tool_call's
@@ -95,7 +95,7 @@ def _extract_trigger_steps(traj: LoadedTrajectory) -> List:
     - Local ``/trajectories/`` style: each compaction step has a non-empty
       ``summary``; ``extract_compaction_events`` is the canonical detector
       and the v2 RM was trained on its output.
-    - EC2 ``/ec2_trajectories/`` style: ``summary`` is omitted (lives in
+    - Server-side ``/trajectories/`` style: ``summary`` is omitted (lives in
       ``_replay.json`` instead), so the same detector returns []. We fall
       back to a ``was_compacted`` rising-edge scan: one event per
       False→True transition. Sticky-True steps after the first fire are
@@ -219,7 +219,7 @@ def _action_at_step(traj: LoadedTrajectory, step_idx: int) -> Optional[str]:
     (which is `step.step` from `_training.json`). Looks up by `.step`
     field (a few captures emit non-contiguous indices) and falls back
     to `_replay.json` tool_calls when `_training.json` left action empty
-    (the EC2 capture path elides the bash text from the per-step record).
+    (the server-side capture path elides the bash text from the per-step record).
 
     When `traj.steps` is empty (e.g. baseline-none trajectories loaded
     only from `_replay.json`) we skip the step-list scan entirely and go

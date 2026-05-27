@@ -373,12 +373,12 @@ def extract_grounding_facts(
 
     analysis_str = _format_repo_analysis(repo_analysis)
 
-    # the training phase: Generate behavioral seed questions (only place patch is seen)
+    # Phase 1: Generate behavioral seed questions (only place patch is seen)
     fact_seeds = _generate_fact_seeds(
         instance.patch, patch_files_str, analysis_str, worker_client,
     )
 
-    # the training phase: Extract facts WITHOUT the raw patch
+    # Phase 2: Extract facts WITHOUT the raw patch
     prompt = FACT_EXTRACTION_PROMPT.format(
         problem_statement=instance.problem_statement[:8000],
         fact_seeds=fact_seeds,
