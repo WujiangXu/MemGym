@@ -10,9 +10,9 @@ focus on entity tracking, bridge-fact extraction, and cross-hop linking.
 from typing import Any, Dict, List, Optional
 
 from ..base import BaseMemoryManager, FilteredContext, register_memory_model
-from ..amem.system import AgenticMemorySystem
-from ..amem import note as _amem_note
-from ..amem import system as _amem_system
+from ..external.amem.system import AgenticMemorySystem
+from ..external.amem import note as _amem_note
+from ..external.amem import system as _amem_system
 
 
 # ---------------------------------------------------------------------------

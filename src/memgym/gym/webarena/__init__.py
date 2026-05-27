@@ -4,8 +4,8 @@ WebArena (Web GUI) gym for MemGym.
 This replaces the OSWorld-based CUA gym which could not run without `/dev/kvm`.
 WebArena-Infinity environments are self-contained Python web servers controlled
 via Playwright/Chromium — no hypervisor, no VM, no KVM. The result is a Web GUI
-trajectory track that runs on the shared EC2 box (or locally, though EC2 is the
-default execution surface) using Docker-only tooling.
+trajectory track that runs on a shared remote box (or locally) using
+Docker-only tooling.
 
 Architecture:
 

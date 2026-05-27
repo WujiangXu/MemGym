@@ -12,8 +12,8 @@ only a few minutes.
 
 Three eval sets, in order of distribution shift:
   IID            : v2 split eval rows (training-distribution check)
-  OOD-memory     : strategy-OOD pairs (Plan v3 Phase A — different
-                   memory strategy, same SWE-Bench scenario)
+  OOD-memory     : strategy-OOD pairs (different memory strategy,
+                   same SWE-Bench scenario)
   OOD-scenario   : τ2-bench memory-gain pairs (different agent domain)
 
 Each emitted JSON carries the same schema as `eval_aug_sft.py`:
@@ -257,7 +257,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                    help="JSONL with `split=eval` rows from the v2 "
                         "training set (the IID held-out source).")
     p.add_argument("--ood-memory-pairs", type=Path, required=True,
-                   help="strategy-OOD JSONL (Plan v3 Phase A).")
+                   help="strategy-OOD JSONL.")
     p.add_argument("--ood-scenario-pairs", type=Path, required=True,
                    help="τ2/scenario-OOD JSONL (build via "
                         "build_tau2_ood_pairs.py).")

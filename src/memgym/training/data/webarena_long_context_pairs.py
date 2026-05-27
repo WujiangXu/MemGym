@@ -476,7 +476,7 @@ def build_pairs_for_cohort(
     """Walk one (baseline, ood) cohort pair and emit pairs.
 
     Args:
-        gate_on_compacted: When True (default, Plan-v3 §A1), only emit a
+        gate_on_compacted: When True (default), only emit a
             row for step k when the OOD trajectory has
             ``step_memory[k]['was_compacted'] == True``.  Set to False to
             recover the old every-step behaviour (used only for CI
@@ -497,7 +497,7 @@ def build_pairs_for_cohort(
             continue
 
         delta_r = ood_load.episode_reward - base_load.episode_reward
-        # Plan v3: drop Δr=0 rows — episode-level no-signal censoring.
+        # Drop Δr=0 rows — episode-level no-signal censoring.
         if abs(delta_r) < 1e-9:
             stats["dropped_delta_zero"] += 1
             continue
@@ -512,7 +512,7 @@ def build_pairs_for_cohort(
 
         domain = f"webarena_{app}"
         for k in range(n_aligned):
-            # Plan v3 §A1: gate emission on was_compacted so we only
+            # Gate emission on was_compacted so we only
             # produce rows where the memory strategy actually fired,
             # avoiding the 86-row diverged=False HARMFUL contamination
             # caused by emitting every step regardless of compaction.

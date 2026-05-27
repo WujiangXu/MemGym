@@ -1,5 +1,4 @@
-"""Unit tests for ``MemoryWorldModel``, ``WorldModelGate``, and
-``WorldModelEvaluator``.
+"""Unit tests for ``MemoryWorldModel`` and ``WorldModelEvaluator``.
 
 We avoid loading real Qwen weights, downloading from HF, or touching a
 GPU. Where the system under test reaches into ``transformers`` or
@@ -10,8 +9,6 @@ The tests cover:
 * ``MemoryWorldModel.predict_logits_text`` — verifies the divergence-
   position decoding + softmax pipeline against a hand-computable
   fake tokenizer / fake forward.
-* ``WorldModelGate`` — verifies it wires recorded/proposed actions
-  into the prompt template and surfaces ``prob_safe``.
 * ``WorldModelEvaluator.evaluate`` and
   ``WorldModelEvaluator.evaluate_predictions`` — verifies routing
   over a tiny JSONL with a stub ``predict_logits``-bearing model.
@@ -164,102 +161,6 @@ def test_predict_logits_text_raises_when_labels_share_full_prefix():
     wm.tokenizer = _DegenerateTokenizer()
     with pytest.raises(ValueError, match="share a full prefix"):
         wm.predict_logits_text("doesn't matter")
-
-
-# ---------------------------------------------------------------------------
-# WorldModelGate
-# ---------------------------------------------------------------------------
-
-class _GateStubMemRM:
-    """Stand-in for ``MemoryWorldModel`` consumed by ``WorldModelGate``.
-
-    Records the prompt the gate built so tests can assert that it
-    includes the recorded + proposed actions verbatim.
-    """
-
-    def __init__(self, prob_safe: float):
-        self.prob_safe = prob_safe
-        self.last_text: str = ""
-
-    def predict_logits_text(
-        self, text: str, safe_threshold: float = 0.5,
-    ) -> Tuple[str, float]:
-        self.last_text = text
-        return ("SAFE" if self.prob_safe >= safe_threshold else "HARMFUL"), self.prob_safe
-
-
-@pytest.fixture()
-def patched_gate(monkeypatch):
-    """Factory that builds a ``WorldModelGate`` with a stub classifier."""
-    from memgym.training.models import world_model_gate as wmg
-
-    def _factory(prob_safe: float = 0.91, threshold: float = 0.78):
-        stub = _GateStubMemRM(prob_safe)
-        monkeypatch.setattr(
-            wmg.MemoryWorldModel, "from_checkpoint",
-            classmethod(lambda cls, ckpt, cfg: stub),
-        )
-        gate = wmg.WorldModelGate(checkpoint="fake-ckpt", threshold=threshold)
-        return gate, stub
-
-    return _factory
-
-
-def test_world_model_gate_score_emits_prompt_with_actions(patched_gate):
-    gate, stub = patched_gate(prob_safe=0.91)
-    prob = gate.score(
-        recorded_action="ls -la",
-        proposed_action="rm -rf /",
-        step=3,
-        perturbation="redaction",
-    )
-    assert prob == pytest.approx(0.91)
-    assert "ls -la" in stub.last_text
-    assert "rm -rf /" in stub.last_text
-    # The Answer: response prefix is appended so the classifier scores
-    # the next-token slot. Without it the divergence position drifts.
-    assert stub.last_text.rstrip().endswith("Answer:")
-
-
-def test_world_model_gate_decision_respects_threshold(patched_gate):
-    gate, _ = patched_gate(prob_safe=0.50, threshold=0.78)
-
-    class _AgentModel:
-        def __init__(self):
-            self.calls = 0
-
-        def query(self, messages: List[Dict[str, Any]]) -> Dict[str, Any]:
-            self.calls += 1
-            # Return a properly bracketed bash block so ``_extract_action``
-            # produces a non-empty proposed/recorded action.
-            return {"content": "```bash\necho hi\n```"}
-
-    agent = _AgentModel()
-    result = gate.gate(
-        agent, full_history=[{"role": "user", "content": "x"}],
-        compressed_history=[{"role": "user", "content": "x"}],
-    )
-    assert result["decision"] is False    # 0.50 < 0.78
-    assert result["prob_safe"] == pytest.approx(0.50)
-    assert result["recorded_action"] == "echo hi"
-    assert result["proposed_action"] == "echo hi"
-    assert agent.calls == 2
-    # Latency dict has all four required keys.
-    for key in ("agent_full", "agent_compressed", "classifier", "total"):
-        assert key in result["latency_ms"]
-
-
-def test_world_model_gate_returns_proposed_response_for_reuse(patched_gate):
-    """The gate's caller skips a second agent call by reusing the
-    ``proposed_response`` it already produced."""
-    gate, _ = patched_gate(prob_safe=0.95)
-
-    class _AgentModel:
-        def query(self, _msgs: List[Dict[str, Any]]) -> Dict[str, Any]:
-            return {"content": "```bash\ntrue\n```", "stop_reason": "tool_calls"}
-
-    out = gate.gate(_AgentModel(), full_history=[], compressed_history=[])
-    assert out["proposed_response"]["stop_reason"] == "tool_calls"
 
 
 # ---------------------------------------------------------------------------

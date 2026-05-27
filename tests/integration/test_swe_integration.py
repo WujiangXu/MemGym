@@ -29,8 +29,8 @@ def test_imports():
         from memgym.envs import SWEMemoryEnv, SWETask
         from memgym.memory import PassThroughMemoryModel, SummarizationMemoryModel
         from memgym.agents import SWEReasoningModel, get_reasoning_model
-        from memgym.utility import TokenTracker
-        from memgym.adapter import TrajectoryRecorder
+        from memgym.utils import TokenTracker
+        from memgym.utils import TrajectoryRecorder
         print("   OK - All imports successful")
         return True
     except Exception as e:

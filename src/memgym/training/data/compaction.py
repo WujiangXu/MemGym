@@ -3,13 +3,14 @@
 For each trajectory with memory, walks steps and finds was_compacted=True.
 Extracts the context around each compaction for world model training.
 
-Refactored from pipelines/memory_training/extract_steps.py.
+Refactored from the legacy memory_training pipeline (removed in the
+repository reorganization; recoverable from git history).
 
 Usage:
     from memgym.training.data.loader import TrajectoryLoader
     from memgym.training.data.compaction import extract_compaction_events
 
-    loader = TrajectoryLoader("ec2_trajectories")
+    loader = TrajectoryLoader("trajectories")
     trajs = loader.load_experiment("train50_sonnet45_llmsummarizing")
     events = extract_compaction_events(trajs["getmoto__moto-4881"])
 """

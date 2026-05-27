@@ -7,17 +7,17 @@ Supports baseline (no memory) and memory-managed runs.
 
 Usage:
     # Run BASELINE (no memory) - 5 instances test
-    python scripts/evaluate_swe_bench.py \
+    memgym-evaluate \
         --dataset lite --model gpt-4o-mini --memory none \
         --slice 0:5 --output results/baseline --verbose
 
     # Run WITH MEMORY - 5 instances test
-    python scripts/evaluate_swe_bench.py \
+    memgym-evaluate \
         --dataset lite --model gpt-4o-mini --memory naive \
         --max-tokens 4000 --slice 0:5 --output results/naive_memory --verbose
 
     # Full evaluation (50 instances)
-    python scripts/evaluate_swe_bench.py \
+    memgym-evaluate \
         --dataset verified --model gpt-4o --memory naive \
         --workers 2 --slice 0:50 --output results/verified_naive
 
@@ -500,13 +500,13 @@ def main():
         epilog="""
 Examples:
   # Baseline (no memory)
-  python scripts/evaluate_swe_bench.py --dataset lite --memory none --slice 0:5 -o results/baseline
+  memgym-evaluate --dataset lite --memory none --slice 0:5 -o results/baseline
 
   # With naive summarization memory
-  python scripts/evaluate_swe_bench.py --dataset lite --memory naive --max-tokens 4000 --slice 0:5 -o results/naive
+  memgym-evaluate --dataset lite --memory naive --max-tokens 4000 --slice 0:5 -o results/naive
 
   # Full verified dataset
-  python scripts/evaluate_swe_bench.py --dataset verified --memory naive --workers 2 -o results/verified
+  memgym-evaluate --dataset verified --memory naive --workers 2 -o results/verified
         """
     )
 

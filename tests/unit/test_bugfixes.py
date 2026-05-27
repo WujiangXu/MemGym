@@ -51,7 +51,7 @@ class TestObservationMaskingToolPairing:
 
     def test_masked_tool_messages_keep_role_and_id(self):
         """After masking, tool messages must retain role='tool' and tool_call_id."""
-        from memgym.memory.observation_masking import ObservationMaskingMemory
+        from memgym.memory.strategies.observation_masking import ObservationMaskingMemory
 
         mem = ObservationMaskingMemory(attention_window=4, keep_first=1)
         msgs = self._make_tool_conversation(n_exchanges=10)
@@ -74,7 +74,7 @@ class TestObservationMaskingToolPairing:
 
     def test_tool_call_pairing_preserved(self):
         """Every assistant tool_calls[].id must have a matching tool response."""
-        from memgym.memory.observation_masking import ObservationMaskingMemory
+        from memgym.memory.strategies.observation_masking import ObservationMaskingMemory
 
         mem = ObservationMaskingMemory(attention_window=4, keep_first=1)
         msgs = self._make_tool_conversation(n_exchanges=10)
@@ -103,7 +103,7 @@ class TestObservationMaskingToolPairing:
 
     def test_no_role_conversion_to_user(self):
         """Masked tool messages must NOT be converted to role='user'."""
-        from memgym.memory.observation_masking import ObservationMaskingMemory
+        from memgym.memory.strategies.observation_masking import ObservationMaskingMemory
 
         mem = ObservationMaskingMemory(attention_window=2, keep_first=1)
         msgs = self._make_tool_conversation(n_exchanges=6)
@@ -169,14 +169,14 @@ class TestNaiveSummarizationKeepFirst:
 
     def test_keep_first_parameter_exists(self):
         """NaiveSummarizationMemory must accept keep_first parameter."""
-        from memgym.memory.naive_summarization import NaiveSummarizationMemory
+        from memgym.memory.strategies.naive_summarization import NaiveSummarizationMemory
 
         mem = NaiveSummarizationMemory(keep_first=2, max_tokens=100)
         assert mem.keep_first == 2
 
     def test_system_prompt_preserved_after_summarization(self):
         """System prompt must survive summarization (without calling LLM)."""
-        from memgym.memory.naive_summarization import NaiveSummarizationMemory
+        from memgym.memory.strategies.naive_summarization import NaiveSummarizationMemory
 
         mem = NaiveSummarizationMemory(
             max_tokens=100,
@@ -212,7 +212,7 @@ class TestNaiveSummarizationKeepFirst:
 
     def test_keep_first_2_preserves_two_messages(self):
         """keep_first=2 should preserve both system prompt and task message."""
-        from memgym.memory.naive_summarization import NaiveSummarizationMemory
+        from memgym.memory.strategies.naive_summarization import NaiveSummarizationMemory
 
         mem = NaiveSummarizationMemory(
             max_tokens=100,
@@ -239,7 +239,7 @@ class TestNaiveSummarizationKeepFirst:
 
     def test_keep_first_in_stats(self):
         """Stats should report keep_first value."""
-        from memgym.memory.naive_summarization import NaiveSummarizationMemory
+        from memgym.memory.strategies.naive_summarization import NaiveSummarizationMemory
 
         mem = NaiveSummarizationMemory(keep_first=3)
         stats = mem.get_stats()
@@ -260,7 +260,7 @@ class TestSlidingWindowSummaryRole:
 
     def test_summary_role_is_user(self):
         """Summary message must use role='user', not role='system'."""
-        from memgym.memory.sliding_window_summary import SlidingWindowSummaryMemory
+        from memgym.memory.strategies.sliding_window_summary import SlidingWindowSummaryMemory
 
         mem = SlidingWindowSummaryMemory(
             window_size=4,
@@ -293,7 +293,7 @@ class TestSlidingWindowSummaryRole:
 
     def test_only_one_system_message(self):
         """After summarization, there should be exactly one system message (index 0)."""
-        from memgym.memory.sliding_window_summary import SlidingWindowSummaryMemory
+        from memgym.memory.strategies.sliding_window_summary import SlidingWindowSummaryMemory
 
         mem = SlidingWindowSummaryMemory(window_size=3, keep_first=1)
         mem._summary = "Work done so far."

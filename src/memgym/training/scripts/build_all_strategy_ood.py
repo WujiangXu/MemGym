@@ -1,6 +1,6 @@
 """CLI: iterate the 5-slice strategy-OOD slate and build all pairs files.
 
-Default slate matches Plan v3 §A0:
+Default slate:
 
     1. structured_ms200      vs sonnet45_llm_summarizing baseline
     2. sliding_window_w75    vs same baseline
@@ -15,7 +15,7 @@ each `<out-root>/heldout_<strat>` dir to produce SFT-pair JSONL.
 Example:
     python -m memgym.training.scripts.build_all_strategy_ood \\
         --traj-root  ${REPO_ROOT}/trajectories \\
-        --ec2-root   ${REPO_ROOT}/ec2_trajectories \\
+        --alt-traj-root   ${REPO_ROOT}/trajectories \\
         --out-root   ${REPO_ROOT}/data/world_model/aug_pairs \\
         --slate      strategy_ood_v1
 """
@@ -35,23 +35,23 @@ from memgym.training.data.memory_gain_pairs import (
 )
 
 
-def _sonnet45_slate(traj_root: Path, ec2_root: Path) -> List[Dict[str, str]]:
-    """The Plan v3 §A0 slate, after a local-data + reeval inventory pass.
+def _sonnet45_slate(traj_root: Path, alt_traj_root: Path) -> List[Dict[str, str]]:
+    """The default slate, after a local-data + reeval inventory pass.
 
     Local `/trajectories/` (Mar 18-21) dirs were never patch-reeval'd, so
     their `outcome` is a meaningless default and Δr collapses to zero. We
-    pivot to `/ec2_trajectories/` runs that DO have reeval JSONs. Slate:
+    pivot to `/trajectories/` runs that DO have reeval JSONs. Slate:
 
     - Anchor (in-distribution): `train50_sonnet45_llmsummarizing` + its
       reeval (run by us; result lands at `*-llmsumm-reeval-for-rmv3-*`).
     - OOD slice 1: `train50_sonnet45_structured_250steps` (reeval'd
-      on-EC2 as `*reeval-struct250v2.json`).
+      server-side as `*reeval-struct250v2.json`).
     - OOD slice 2: `train50_struct_haiku_ms100_r075` (cross-model
       crossover; reeval'd as `*run5-reeval.json`).
 
     Slice 3 (sonnet45 + sliding_window or obs_masking) is dropped from
     this batch — neither strategy has both `_training.json` files AND a
-    reeval on EC2. Adding them would require re-running the agent on
+    reeval. Adding them would require re-running the agent on
     those strategies, which is out of scope for this OOD eval pass.
 
     The 'baseline-none' (`train50_sonnet45_baseline`) anchor is also
@@ -61,7 +61,7 @@ def _sonnet45_slate(traj_root: Path, ec2_root: Path) -> List[Dict[str, str]]:
     for a future "memory-on vs no-memory" comparison if we extend the
     builder to read replay-only baselines.
     """
-    anchor_dir = ec2_root / "train50_sonnet45_llmsummarizing"
+    anchor_dir = alt_traj_root / "train50_sonnet45_llmsummarizing"
     return [
         {
             "baseline_dir": str(anchor_dir),
@@ -70,9 +70,9 @@ def _sonnet45_slate(traj_root: Path, ec2_root: Path) -> List[Dict[str, str]]:
                 / "bedrock__us.anthropic.claude-sonnet-4-5-20250929-v1:0."
                   "llmsumm-reeval-for-rmv3-strategy-ood.json"
             ),
-            "ood_dir": str(ec2_root / "train50_sonnet45_structured_250steps"),
+            "ood_dir": str(alt_traj_root / "train50_sonnet45_structured_250steps"),
             "ood_reeval": str(
-                ec2_root / "train50_sonnet45_structured_250steps"
+                alt_traj_root / "train50_sonnet45_structured_250steps"
                 / "bedrock__us.anthropic.claude-sonnet-4-5-20250929-v1:0."
                   "reeval-struct250v2.json"
             ),
@@ -85,9 +85,9 @@ def _sonnet45_slate(traj_root: Path, ec2_root: Path) -> List[Dict[str, str]]:
                 / "bedrock__us.anthropic.claude-sonnet-4-5-20250929-v1:0."
                   "llmsumm-reeval-for-rmv3-strategy-ood.json"
             ),
-            "ood_dir": str(ec2_root / "train50_struct_haiku_ms100_r075"),
+            "ood_dir": str(alt_traj_root / "train50_struct_haiku_ms100_r075"),
             "ood_reeval": str(
-                ec2_root / "train50_struct_haiku_ms100_r075"
+                alt_traj_root / "train50_struct_haiku_ms100_r075"
                 / "bedrock__us.anthropic.claude-sonnet-4-5-20250929-v1:0."
                   "run5-reeval.json"
             ),
@@ -107,8 +107,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--traj-root", type=Path, required=True,
                         help="Root for /trajectories style dirs (sonnet45 sweep)")
-    parser.add_argument("--ec2-root", type=Path, required=True,
-                        help="Root for /ec2_trajectories style dirs "
+    parser.add_argument("--alt-traj-root", type=Path, required=True,
+                        help="Root for /trajectories style dirs "
                              "(haiku45 + apr-3 onward)")
     parser.add_argument("--out-root", type=Path, required=True,
                         help="Where each heldout_<strat>/pairs_partial.jsonl lands")
@@ -120,7 +120,7 @@ def main() -> int:
                              "this, the script raises on the first missing dir.")
     args = parser.parse_args()
 
-    slate = SLATES[args.slate](args.traj_root, args.ec2_root)
+    slate = SLATES[args.slate](args.traj_root, args.alt_traj_root)
     args.out_root.mkdir(parents=True, exist_ok=True)
 
     summary: Dict[str, dict] = {}

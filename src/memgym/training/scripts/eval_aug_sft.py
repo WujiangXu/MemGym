@@ -1,10 +1,9 @@
 """Held-out per-class eval for the augmentation-pair SFT checkpoint.
 
-The sister-project recipe deliberately leaves out evaluation — the cheat
-doc (`the internal handoff doc` §2.7) is explicit that with ≈88% of one class,
-CE-on-one-token saturates to near-zero by always predicting the majority
-class, and **per-class held-out accuracy** is what distinguishes learned
-signal from collapse. This is that evaluator.
+Single-token cross-entropy saturates to near-zero when one class
+dominates (≈88% here): always predicting the majority class is already
+low-loss, so **per-class held-out accuracy** is what distinguishes
+learned signal from collapse. This is that evaluator.
 
 Reads `aug_sft_pairs.jsonl`, filters `split=="eval"`, runs one forward
 pass per row via `MemoryWorldModel.predict_logits_text` (matches the
@@ -12,8 +11,8 @@ raw-text prompt+completion format the trainer saw), aggregates via the
 existing `WorldModelEvaluator` → `EvalMetrics` (per-class P/R/F1, AUROC,
 ECE, per-perturbation, per-source-model).
 
-**Gate** (from plan): SAFE-F1 > 0.4 AND AUROC > 0.65. Below that,
-the training phase with class weighting is required.
+Acceptance: SAFE-F1 > 0.4 AND AUROC > 0.65. Below that, class-weighted
+training is required.
 """
 from __future__ import annotations
 

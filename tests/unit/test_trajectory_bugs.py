@@ -48,7 +48,7 @@ def _simulate_agent_steps(memory, n_steps):
 class TestNaiveNoDuplication(unittest.TestCase):
     """Bug 1: _observations accumulation causes duplication with original_context."""
 
-    @patch("memgym.memory.naive_summarization.completion")
+    @patch("memgym.memory.strategies.naive_summarization.completion")
     def test_naive_no_observation_duplication(self, mock_completion):
         """Content returned by manage_context must not contain duplicate messages."""
         mock_response = MagicMock()
@@ -56,7 +56,7 @@ class TestNaiveNoDuplication(unittest.TestCase):
         mock_response.choices[0].message.content = "Test summary."
         mock_completion.return_value = mock_response
 
-        from memgym.memory.naive_summarization import NaiveSummarizationMemory
+        from memgym.memory.strategies.naive_summarization import NaiveSummarizationMemory
         memory = NaiveSummarizationMemory(max_tokens=100000)  # High threshold, no summarization
 
         results, messages = _simulate_agent_steps(memory, 5)
@@ -71,7 +71,7 @@ class TestNaiveNoDuplication(unittest.TestCase):
                     f"Step {i+1}: Duplicate message found: role={msg_key[0]}, content={msg_key[1][:50]}...")
                 seen.append(msg_key)
 
-    @patch("memgym.memory.naive_summarization.completion")
+    @patch("memgym.memory.strategies.naive_summarization.completion")
     def test_naive_multi_step_no_token_inflation(self, mock_completion):
         """Token count must grow linearly with messages, not quadratically."""
         mock_response = MagicMock()
@@ -79,7 +79,7 @@ class TestNaiveNoDuplication(unittest.TestCase):
         mock_response.choices[0].message.content = "Summary."
         mock_completion.return_value = mock_response
 
-        from memgym.memory.naive_summarization import NaiveSummarizationMemory
+        from memgym.memory.strategies.naive_summarization import NaiveSummarizationMemory
         memory = NaiveSummarizationMemory(max_tokens=100000)  # No summarization
 
         results, _ = _simulate_agent_steps(memory, 10)
@@ -100,7 +100,7 @@ class TestNaiveNoDuplication(unittest.TestCase):
 class TestNaiveCompressionRatio(unittest.TestCase):
     """Bug 2: Missing compression_ratio in naive metadata."""
 
-    @patch("memgym.memory.naive_summarization.completion")
+    @patch("memgym.memory.strategies.naive_summarization.completion")
     def test_naive_compression_ratio_in_metadata(self, mock_completion):
         """compression_ratio must exist and be > 1.0 when compacted with enough messages."""
         mock_response = MagicMock()
@@ -108,7 +108,7 @@ class TestNaiveCompressionRatio(unittest.TestCase):
         mock_response.choices[0].message.content = "Short summary."
         mock_completion.return_value = mock_response
 
-        from memgym.memory.naive_summarization import NaiveSummarizationMemory
+        from memgym.memory.strategies.naive_summarization import NaiveSummarizationMemory
         memory = NaiveSummarizationMemory(max_tokens=100, keep_recent=2)
 
         # Build enough content to trigger summarization — many messages so summary is shorter
@@ -135,7 +135,7 @@ class TestNaiveCompressionRatio(unittest.TestCase):
 class TestNaiveKeepsRecent(unittest.TestCase):
     """Bug 3: Over-aggressive output — only 2 messages after summarization."""
 
-    @patch("memgym.memory.naive_summarization.completion")
+    @patch("memgym.memory.strategies.naive_summarization.completion")
     def test_naive_keeps_recent_after_summary(self, mock_completion):
         """After summarization, output must have more than 2 messages (summary + tail)."""
         mock_response = MagicMock()
@@ -143,7 +143,7 @@ class TestNaiveKeepsRecent(unittest.TestCase):
         mock_response.choices[0].message.content = "Summary."
         mock_completion.return_value = mock_response
 
-        from memgym.memory.naive_summarization import NaiveSummarizationMemory
+        from memgym.memory.strategies.naive_summarization import NaiveSummarizationMemory
         memory = NaiveSummarizationMemory(max_tokens=50, keep_recent=3)
 
         # Build enough messages to trigger summarization
@@ -187,7 +187,7 @@ class TestAllStrategiesConsistentMetadata(unittest.TestCase):
     REQUIRED_KEYS = {"tokens", "original_tokens", "was_compacted",
                      "compression_ratio", "direct_messages", "strategy"}
 
-    @patch("memgym.memory.naive_summarization.completion")
+    @patch("memgym.memory.strategies.naive_summarization.completion")
     def test_all_strategies_consistent_metadata(self, mock_completion):
         """Every strategy must include all required metadata keys."""
         mock_response = MagicMock()
@@ -196,8 +196,8 @@ class TestAllStrategiesConsistentMetadata(unittest.TestCase):
         mock_completion.return_value = mock_response
 
         from memgym.memory.base import PassThroughMemory
-        from memgym.memory.observation_masking import ObservationMaskingMemory
-        from memgym.memory.naive_summarization import NaiveSummarizationMemory
+        from memgym.memory.strategies.observation_masking import ObservationMaskingMemory
+        from memgym.memory.strategies.naive_summarization import NaiveSummarizationMemory
 
         strategies = [
             ("PassThrough", PassThroughMemory()),
@@ -293,7 +293,7 @@ class TestFinalStepObservation(unittest.TestCase):
 class TestNaiveSummarizationContent(unittest.TestCase):
     """Bug 1 (continued): Content sent to LLM for summarization must not be duplicated."""
 
-    @patch("memgym.memory.naive_summarization.completion")
+    @patch("memgym.memory.strategies.naive_summarization.completion")
     def test_naive_summarization_content_not_duplicated(self, mock_completion):
         """The content sent to LLM for summarization must not duplicate messages."""
         mock_response = MagicMock()
@@ -301,7 +301,7 @@ class TestNaiveSummarizationContent(unittest.TestCase):
         mock_response.choices[0].message.content = "Summary."
         mock_completion.return_value = mock_response
 
-        from memgym.memory.naive_summarization import NaiveSummarizationMemory
+        from memgym.memory.strategies.naive_summarization import NaiveSummarizationMemory
         memory = NaiveSummarizationMemory(max_tokens=50, keep_recent=2)
 
         # Use unique per-message markers to detect duplication
@@ -338,7 +338,7 @@ class TestReplayAnalysisMetadataMatch(unittest.TestCase):
 
     def test_replay_analysis_metadata_matches_direct(self):
         """Per-step metadata from analyze_replay must match direct manage_context calls."""
-        from memgym.memory.observation_masking import ObservationMaskingMemory
+        from memgym.memory.strategies.observation_masking import ObservationMaskingMemory
         from memgym.gym.swe_bench.env import _build_step_index
 
         # Build a realistic message sequence

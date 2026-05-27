@@ -149,7 +149,7 @@ dr = load_dataset("MemGym/memgym-dr-instances",
 > none are included in this release.)
 
 To regenerate (needs the `[swe]` extra + an LLM key), see
-[tracks.md](tracks.md#memgym-dr) and `TESTING.md` Tier 3.
+[tracks.md](tracks.md#memgym-dr) and `testing.md` Tier 3.
 
 ---
 
@@ -170,7 +170,7 @@ Fig. 2a.
   `num_critical_facts`, `num_external_facts`, `difficulty_preset`, … (see card).
 
 Generate it yourself today (no review gate on the pipeline) — see
-[tracks.md](tracks.md#memgym-codeqa) and `TESTING.md` Tier 3.
+[tracks.md](tracks.md#memgym-codeqa) and `testing.md` Tier 3.
 
 ---
 
@@ -179,9 +179,8 @@ Generate it yourself today (no review gate on the pipeline) — see
 - **Eval** pulls the split repos above automatically (`memgym-eval-rm` resolves
   HF repo IDs via `snapshot_download`). No manual download needed.
 - **Retraining MemRM** uses the public corpus: train on
-  `MemGym/memgym-rm-train` and validate on `MemGym/memgym-rm-iid-heldout`. (The
-  legacy `download_rm_v2.py` script points at an internal monorepo that is not
-  part of the public release; prefer the two split repos.)
+  `MemGym/memgym-rm-train` and validate on `MemGym/memgym-rm-iid-heldout`
+  (both auto-download via `load_dataset`).
 
 ## Known data discrepancies (tracked, not hidden)
 

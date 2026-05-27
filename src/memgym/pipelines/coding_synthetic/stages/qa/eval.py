@@ -57,7 +57,7 @@ def _format_memory_files(memory_files: Dict[str, str]) -> str:
 
 
 # ---------------------------------------------------------------------------
-# the training phase ingestion grouping
+# Phase-1 ingestion grouping
 # ---------------------------------------------------------------------------
 #
 # IR-track memory eval concatenates a turn's documents into one observation
@@ -315,7 +315,7 @@ def evaluate_evicted(
             the prompt-based note-taking loop entirely.
         ingest_chars_per_call: Per-ingest text budget (default matches the
             15 000-char cap inside amem_method / lightmem_method).
-        ingest_max_calls: Cap on the training phase ingest calls per instance.
+        ingest_max_calls: Cap on Phase-1 ingest calls per instance.
             Default 3 mirrors the IR-track 3-turn pattern; this is the main
             knob that prevents the N-files × M-LLM-calls hang.
         answerer_prompt_char_cap: Per-QA-pair, per-section soft cap applied
@@ -335,7 +335,7 @@ def evaluate_evicted(
     )
 
     if use_memory_method:
-        # the training phase (memory method): one ingest per group instead of per file.
+        # Phase 1 (memory method): one ingest per group instead of per file.
         # Net effect on a typical 8-file instance: amem 8→3 LLM calls,
         # lightmem 16→6 LLM calls.
         memory_method.reset()
@@ -343,7 +343,7 @@ def evaluate_evicted(
             memory_method.ingest(group_name, group_text, instance.task_prompt)
             ingest_calls += 1
     else:
-        # the training phase (prompt-based): note-taking once per group, accumulating.
+        # Phase 1 (prompt-based): note-taking once per group, accumulating.
         allow_notes = strategy != "none"
         strategy_instruction = STRATEGY_INSTRUCTIONS.get(
             strategy, STRATEGY_INSTRUCTIONS["basic"]
@@ -382,7 +382,7 @@ def evaluate_evicted(
                     "notes": new_notes,
                 })
 
-    # the training phase: Answer questions using notes/memories + context
+    # Phase 2: Answer questions using notes/memories + context
     qa_scores = []
     all_answers = []
     if not use_memory_method:

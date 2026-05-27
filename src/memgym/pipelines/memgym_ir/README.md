@@ -44,8 +44,8 @@ python -m pipelines.memgym_ir --dry-run --limit 50
 # Full run with Claude models
 python -m pipelines.memgym_ir --limit 50 --output results/ir_test
 
-# Via EC2 API
-curl -X POST http://<YOUR_EC2_HOST>:30000/run-ir-pipeline \
+# Via the job-runner API (optional remote server)
+curl -X POST http://<YOUR_HOST>:30000/run-ir-pipeline \
   -H "Content-Type: application/json" \
   -d '{"limit": 50, "output": "results/ir_test"}'
 ```

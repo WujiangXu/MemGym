@@ -30,45 +30,45 @@ from .base import (
     PassThroughMemoryModel,
 )
 
-# Import to register
-from .summarization import SummarizationMemory, SummarizationMemoryModel
-from .naive_summarization import (
+# Generic strategies — import triggers registration by name
+from .strategies.summarization import SummarizationMemory, SummarizationMemoryModel
+from .strategies.naive_summarization import (
     NaiveSummarizationMemory,
     NaiveSummarizationMemoryModel,
     SUMMARIZATION_PROMPTS,
 )
 
 # OpenHands-ported condensers (import triggers registration)
-from .observation_masking import ObservationMaskingMemory
-from .llm_summarizing import LLMSummarizingMemory
-from .structured_summary import StructuredSummaryMemory
-from .pipeline import PipelineMemory
+from .strategies.observation_masking import ObservationMaskingMemory
+from .strategies.llm_summarizing import LLMSummarizingMemory
+from .strategies.structured_summary import StructuredSummaryMemory
+from .strategies.pipeline import PipelineMemory
 
 # Sliding window + incremental summary (import triggers registration)
-from .sliding_window_summary import SlidingWindowSummaryMemory
-from .adaptive_token_budget import (
+from .strategies.sliding_window_summary import SlidingWindowSummaryMemory
+from .strategies.adaptive_token_budget import (
     AdaptiveTokenBudgetMemory,
     AdaptiveTokenBudgetMemoryModel,
 )
 
 # Multimodal adapter for CUA agents (import triggers registration)
-from .multimodal_adapter import MultimodalMemoryAdapter
+from .strategies.multimodal_adapter import MultimodalMemoryAdapter
 
 # CUA-specific memory strategies (import triggers registration)
-from .cua import CUALLMSummarizingMemory, CUAStructuredSummaryMemory, CUANaiveSummarizationMemory
+from .adapters.cua import CUALLMSummarizingMemory, CUAStructuredSummaryMemory, CUANaiveSummarizationMemory
 
 # IR-specific memory strategies (import triggers registration)
 from .ir import IRPassThrough, IRSummarizingMemory, IRStructuredSummary
 
 # WebArena-specific memory strategies (import triggers registration)
-from .webarena import WebArenaSummarizingMemory, WebArenaStructuredSummary
+from .adapters.webarena import WebArenaSummarizingMemory, WebArenaStructuredSummary
 
 # Tau2-bench dialogue memory strategies (import triggers registration)
-from .tau2_bench import Tau2SummarizingMemory, Tau2StructuredSummary
+from .adapters.tau2_bench import Tau2SummarizingMemory, Tau2StructuredSummary
 
 # A-mem is optional (requires extra dependencies: sentence-transformers, sklearn, etc.)
 try:
-    from .amem import (
+    from .external.amem import (
         AMemMemoryModel,
         AgenticMemorySystem,
         MemoryNote,

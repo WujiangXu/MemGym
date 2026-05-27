@@ -10,7 +10,7 @@ Covers:
    maps to `SimpleMemSystem.finalize()`; `retrieve()` reads through the
    `hybrid_retriever`.
 3. `reset()` drops the system reference so a fresh instance can be
-   constructed (per-instance temp DBs are how the training phase isolates state).
+   constructed (per-instance temp DBs are how Phase-5 isolates state).
 4. Both pipeline adapters (`SimpleMemMethod`, `IRSimpleMemMemory`) wire
    into the shared core correctly.
 
@@ -76,25 +76,25 @@ def _restore_fake_simplemem(monkey: dict):
 
 class TestSimpleMemBackendInit(unittest.TestCase):
     def test_strips_openai_prefix(self):
-        from memgym.memory.simplemem_core import SimpleMemBackend
+        from memgym.memory.external.simplemem import SimpleMemBackend
         b = SimpleMemBackend(llm_model="openai/gpt-4o-mini")
         self.assertEqual(b._llm_model, "gpt-4o-mini")
 
     def test_leaves_unprefixed_model_alone(self):
-        from memgym.memory.simplemem_core import SimpleMemBackend
+        from memgym.memory.external.simplemem import SimpleMemBackend
         b = SimpleMemBackend(llm_model="gpt-4o-mini")
         self.assertEqual(b._llm_model, "gpt-4o-mini")
 
     def test_does_not_strip_non_openai_prefix(self):
-        from memgym.memory.simplemem_core import SimpleMemBackend
+        from memgym.memory.external.simplemem import SimpleMemBackend
         b = SimpleMemBackend(llm_model="bedrock/claude-haiku")
         self.assertEqual(b._llm_model, "bedrock/claude-haiku")
 
     def test_no_system_created_at_init(self):
         """The expensive SimpleMem init (model loads, DB connect) must
-        defer until the first add_doc — the training phase spawns hundreds of
+        defer until the first add_doc — Phase-5 spawns hundreds of
         instances, most of which never index anything."""
-        from memgym.memory.simplemem_core import SimpleMemBackend
+        from memgym.memory.external.simplemem import SimpleMemBackend
         b = SimpleMemBackend(llm_model="gpt-4o-mini")
         self.assertIsNone(b._system)
 
@@ -107,7 +107,7 @@ class TestSimpleMemBackendBuffering(unittest.TestCase):
         _restore_fake_simplemem(self._monkey)
 
     def test_add_doc_creates_system_lazily(self):
-        from memgym.memory.simplemem_core import SimpleMemBackend
+        from memgym.memory.external.simplemem import SimpleMemBackend
         ctor, fake_instance = _install_fake_simplemem(self._monkey)
         b = SimpleMemBackend(llm_model="gpt-4o-mini")
         ctor.assert_not_called()
@@ -119,7 +119,7 @@ class TestSimpleMemBackendBuffering(unittest.TestCase):
         """SimpleMem requires monotonically-increasing timestamps; the
         backend fakes them. If two calls collide on a single timestamp
         SimpleMem may overwrite or merge entries unexpectedly."""
-        from memgym.memory.simplemem_core import SimpleMemBackend
+        from memgym.memory.external.simplemem import SimpleMemBackend
         _, fake_instance = _install_fake_simplemem(self._monkey)
         b = SimpleMemBackend(llm_model="gpt-4o-mini")
         b.add_doc("doc-1", "alpha")
@@ -130,7 +130,7 @@ class TestSimpleMemBackendBuffering(unittest.TestCase):
         self.assertLess(ts1, ts2)
 
     def test_empty_text_is_skipped(self):
-        from memgym.memory.simplemem_core import SimpleMemBackend
+        from memgym.memory.external.simplemem import SimpleMemBackend
         ctor, _ = _install_fake_simplemem(self._monkey)
         b = SimpleMemBackend(llm_model="gpt-4o-mini")
         b.add_doc("doc-1", "")
@@ -138,7 +138,7 @@ class TestSimpleMemBackendBuffering(unittest.TestCase):
         ctor.assert_not_called()
 
     def test_retrieve_with_no_docs_short_circuits(self):
-        from memgym.memory.simplemem_core import SimpleMemBackend
+        from memgym.memory.external.simplemem import SimpleMemBackend
         ctor, _ = _install_fake_simplemem(self._monkey)
         b = SimpleMemBackend(llm_model="gpt-4o-mini")
         result = b.retrieve("any question")
@@ -146,7 +146,7 @@ class TestSimpleMemBackendBuffering(unittest.TestCase):
         ctor.assert_not_called()
 
     def test_retrieve_lazy_commits_exactly_once(self):
-        from memgym.memory.simplemem_core import SimpleMemBackend
+        from memgym.memory.external.simplemem import SimpleMemBackend
         _, fake_instance = _install_fake_simplemem(
             self._monkey, retrieved_entries=["entry A", "entry B"],
         )
@@ -160,7 +160,7 @@ class TestSimpleMemBackendBuffering(unittest.TestCase):
         self.assertEqual(fake_instance.finalize.call_count, 1)
 
     def test_add_doc_after_commit_re_finalizes(self):
-        from memgym.memory.simplemem_core import SimpleMemBackend
+        from memgym.memory.external.simplemem import SimpleMemBackend
         _, fake_instance = _install_fake_simplemem(
             self._monkey, retrieved_entries=["e"],
         )
@@ -172,7 +172,7 @@ class TestSimpleMemBackendBuffering(unittest.TestCase):
         self.assertEqual(fake_instance.finalize.call_count, 2)
 
     def test_retrieve_honors_top_k(self):
-        from memgym.memory.simplemem_core import SimpleMemBackend
+        from memgym.memory.external.simplemem import SimpleMemBackend
         _install_fake_simplemem(
             self._monkey,
             retrieved_entries=["a", "b", "c", "d", "e"],
@@ -191,7 +191,7 @@ class TestSimpleMemBackendReset(unittest.TestCase):
         _restore_fake_simplemem(self._monkey)
 
     def test_reset_drops_system_and_resets_dialogue_id(self):
-        from memgym.memory.simplemem_core import SimpleMemBackend
+        from memgym.memory.external.simplemem import SimpleMemBackend
         _install_fake_simplemem(self._monkey, retrieved_entries=["x"])
         b = SimpleMemBackend(llm_model="gpt-4o-mini")
         b.add_doc("doc-1", "alpha")

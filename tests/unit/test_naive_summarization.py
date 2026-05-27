@@ -9,8 +9,8 @@ import sys
 import unittest
 from unittest.mock import MagicMock, patch
 
-from memgym.memory.naive_summarization import NaiveSummarizationMemory, SUMMARIZATION_PROMPTS
-from memgym.memory.summarizer_backend import (
+from memgym.memory.strategies.naive_summarization import NaiveSummarizationMemory, SUMMARIZATION_PROMPTS
+from memgym.memory.backends.summarizer_backend import (
     LitellmSummarizerBackend,
     LocalHFSummarizerBackend,
     SummarizerBackend,
@@ -28,7 +28,7 @@ class TestNaiveSummarizationMemory(unittest.TestCase):
     """
 
     def setUp(self):
-        self.mock_completion_patcher = patch("memgym.memory.summarizer_backend.completion")
+        self.mock_completion_patcher = patch("memgym.memory.backends.summarizer_backend.completion")
         self.mock_completion = self.mock_completion_patcher.start()
 
         self.mock_response = MagicMock()
@@ -317,7 +317,7 @@ class TestThinkingStripping(unittest.TestCase):
     """
 
     def setUp(self):
-        self.mock_completion_patcher = patch("memgym.memory.summarizer_backend.completion")
+        self.mock_completion_patcher = patch("memgym.memory.backends.summarizer_backend.completion")
         self.mock_completion = self.mock_completion_patcher.start()
         self.mock_response = MagicMock()
         self.mock_response.choices = [MagicMock()]

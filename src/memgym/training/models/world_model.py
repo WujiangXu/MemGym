@@ -33,7 +33,7 @@ class ModelConfig:
 
     # Completion label pair the classifier was trained against. Must match
     # what the aug-pairs adapter wrote to the `completion` field.
-    # Phase A sweeps these over {" Y"/" N", " yes"/" no", " good"/" bad"}.
+    # The label-axis sweep covers {" Y"/" N", " yes"/" no", " good"/" bad"}.
     # Required single-token under the base tokenizer so CE-on-one-token is
     # symmetric across labels.
     safe_completion: str = " Y"
@@ -67,7 +67,7 @@ class MemoryWorldModel:
     def __init__(self, config: Optional[ModelConfig] = None):
         self.config = config or ModelConfig()
         # Completion-suffix strings that `aug_pairs.py` writes as the SFT
-        # completion field. Driven by ModelConfig so Phase A's label
+        # completion field. Driven by ModelConfig so the label-axis
         # sweep flips between " Y"/" N", " yes"/" no", " good"/" bad"
         # without touching call sites. Must be single-token under the
         # base tokenizer — `predict_logits_text` errors loudly if not.

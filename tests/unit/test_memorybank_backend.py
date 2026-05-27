@@ -62,12 +62,12 @@ def _restore_fake(monkey: dict, name: str):
 
 class TestMemoryBankChunking(unittest.TestCase):
     def test_empty_text_returns_empty(self):
-        from memgym.memory.memorybank_core import MemoryBankSystem
+        from memgym.memory.external.memorybank import MemoryBankSystem
         s = MemoryBankSystem()
         self.assertEqual(s._chunk(""), [])
 
     def test_paragraph_split(self):
-        from memgym.memory.memorybank_core import MemoryBankSystem
+        from memgym.memory.external.memorybank import MemoryBankSystem
         s = MemoryBankSystem(chunk_chars=1000)
         text = "para A\n\npara B\n\npara C"
         chunks = s._chunk(text)
@@ -77,7 +77,7 @@ class TestMemoryBankChunking(unittest.TestCase):
         self.assertIn("para C", joined)
 
     def test_hard_cap_respected(self):
-        from memgym.memory.memorybank_core import MemoryBankSystem
+        from memgym.memory.external.memorybank import MemoryBankSystem
         s = MemoryBankSystem(chunk_chars=20)
         # One giant paragraph, way over cap.
         text = "x" * 100
@@ -95,7 +95,7 @@ class TestMemoryBankAddRetrieve(unittest.TestCase):
         _restore_fake(self._monkey, "sentence_transformers")
 
     def test_empty_text_is_skipped(self):
-        from memgym.memory.memorybank_core import MemoryBankSystem
+        from memgym.memory.external.memorybank import MemoryBankSystem
         _install_fake_sentence_transformers(self._monkey)
         s = MemoryBankSystem()
         s.add_doc("doc-1", "")
@@ -103,7 +103,7 @@ class TestMemoryBankAddRetrieve(unittest.TestCase):
         self.assertEqual(len(s._units), 0)
 
     def test_add_doc_creates_units_with_strength_one(self):
-        from memgym.memory.memorybank_core import MemoryBankSystem
+        from memgym.memory.external.memorybank import MemoryBankSystem
         _install_fake_sentence_transformers(self._monkey)
         s = MemoryBankSystem(chunk_chars=1000)
         s.add_doc("doc-1", "para A\n\npara B")
@@ -113,12 +113,12 @@ class TestMemoryBankAddRetrieve(unittest.TestCase):
             self.assertIn("[doc-1]", unit["content"])
 
     def test_retrieve_empty_store_returns_empty(self):
-        from memgym.memory.memorybank_core import MemoryBankSystem
+        from memgym.memory.external.memorybank import MemoryBankSystem
         s = MemoryBankSystem()
         self.assertEqual(s.retrieve("anything"), [])
 
     def test_retrieve_ranks_by_cosine(self):
-        from memgym.memory.memorybank_core import MemoryBankSystem
+        from memgym.memory.external.memorybank import MemoryBankSystem
 
         # Three units: e0=(1,0,0,0), e1=(0,1,0,0), e2=(0,0,1,0).
         # Query embedding = (0,1,0,0) → unit 1 ranks first.
@@ -137,7 +137,7 @@ class TestMemoryBankAddRetrieve(unittest.TestCase):
         self.assertTrue(results[0].startswith("[doc-2]"))
 
     def test_reinforcement_increases_strength(self):
-        from memgym.memory.memorybank_core import MemoryBankSystem
+        from memgym.memory.external.memorybank import MemoryBankSystem
 
         embeddings = [[1, 0, 0, 0], [1, 0, 0, 0]]  # 1 chunk + 1 query
         _install_fake_sentence_transformers(self._monkey, embeddings)
@@ -150,7 +150,7 @@ class TestMemoryBankAddRetrieve(unittest.TestCase):
         self.assertAlmostEqual(after, before * 1.5)
 
     def test_strength_cap_respected(self):
-        from memgym.memory.memorybank_core import MemoryBankSystem
+        from memgym.memory.external.memorybank import MemoryBankSystem
 
         embeddings = [[1, 0, 0, 0]] * 10
         _install_fake_sentence_transformers(self._monkey, embeddings)
@@ -163,7 +163,7 @@ class TestMemoryBankAddRetrieve(unittest.TestCase):
         self.assertEqual(s._units[0]["strength"], 20.0)
 
     def test_retrieve_top_k_overrides_default(self):
-        from memgym.memory.memorybank_core import MemoryBankSystem
+        from memgym.memory.external.memorybank import MemoryBankSystem
 
         embeddings = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0],
                       [0, 0, 0, 1], [1, 0, 0, 0]]
@@ -183,7 +183,7 @@ class TestMemoryBankReset(unittest.TestCase):
         _restore_fake(self._monkey, "sentence_transformers")
 
     def test_reset_clears_units(self):
-        from memgym.memory.memorybank_core import MemoryBankSystem
+        from memgym.memory.external.memorybank import MemoryBankSystem
         _install_fake_sentence_transformers(self._monkey)
         s = MemoryBankSystem()
         s.add_doc("doc-1", "alpha")

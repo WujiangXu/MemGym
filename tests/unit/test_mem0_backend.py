@@ -11,7 +11,7 @@ Covers:
 3. `retrieve` shapes both list-style and `{"results": [...]}` SDK returns
    into a flat list of strings.
 4. `reset` rotates `user_id` instead of tearing down the embedder
-   (cheapest reset for the training phase's many-instance reuse).
+   (cheapest reset for Phase-5's many-instance reuse).
 5. Both pipeline adapters wire into the shared core correctly.
 """
 from __future__ import annotations
@@ -47,27 +47,27 @@ def _restore_fake_mem0(monkey: dict):
 
 class TestMem0SystemInit(unittest.TestCase):
     def test_strips_openai_prefix(self):
-        from memgym.memory.mem0_core import Mem0System
+        from memgym.memory.external.mem0 import Mem0System
         s = Mem0System(llm_model="openai/gpt-4o-mini")
         self.assertEqual(s._llm_model, "gpt-4o-mini")
 
     def test_leaves_unprefixed_model_alone(self):
-        from memgym.memory.mem0_core import Mem0System
+        from memgym.memory.external.mem0 import Mem0System
         s = Mem0System(llm_model="gpt-4o-mini")
         self.assertEqual(s._llm_model, "gpt-4o-mini")
 
     def test_does_not_strip_non_openai_prefix(self):
-        from memgym.memory.mem0_core import Mem0System
+        from memgym.memory.external.mem0 import Mem0System
         s = Mem0System(llm_model="bedrock/claude-haiku")
         self.assertEqual(s._llm_model, "bedrock/claude-haiku")
 
     def test_no_system_created_at_init(self):
-        from memgym.memory.mem0_core import Mem0System
+        from memgym.memory.external.mem0 import Mem0System
         s = Mem0System(llm_model="gpt-4o-mini")
         self.assertIsNone(s._memory)
 
     def test_user_id_is_unique(self):
-        from memgym.memory.mem0_core import Mem0System
+        from memgym.memory.external.mem0 import Mem0System
         s1 = Mem0System(llm_model="gpt-4o-mini")
         s2 = Mem0System(llm_model="gpt-4o-mini")
         self.assertNotEqual(s1._user_id, s2._user_id)
@@ -81,7 +81,7 @@ class TestMem0SystemAddRetrieve(unittest.TestCase):
         _restore_fake_mem0(self._monkey)
 
     def test_add_doc_creates_memory_lazily(self):
-        from memgym.memory.mem0_core import Mem0System
+        from memgym.memory.external.mem0 import Mem0System
         cls, inst = _install_fake_mem0(self._monkey)
         s = Mem0System(llm_model="gpt-4o-mini")
         cls.from_config.assert_not_called()
@@ -90,7 +90,7 @@ class TestMem0SystemAddRetrieve(unittest.TestCase):
         inst.add.assert_called_once()
 
     def test_add_doc_passes_user_id_and_metadata(self):
-        from memgym.memory.mem0_core import Mem0System
+        from memgym.memory.external.mem0 import Mem0System
         _, inst = _install_fake_mem0(self._monkey)
         s = Mem0System(llm_model="gpt-4o-mini")
         s.add_doc("doc-1", "alpha")
@@ -101,7 +101,7 @@ class TestMem0SystemAddRetrieve(unittest.TestCase):
         self.assertIn("alpha", call.kwargs["messages"])
 
     def test_empty_text_is_skipped(self):
-        from memgym.memory.mem0_core import Mem0System
+        from memgym.memory.external.mem0 import Mem0System
         cls, _ = _install_fake_mem0(self._monkey)
         s = Mem0System(llm_model="gpt-4o-mini")
         s.add_doc("doc-1", "")
@@ -109,7 +109,7 @@ class TestMem0SystemAddRetrieve(unittest.TestCase):
         cls.from_config.assert_not_called()
 
     def test_retrieve_with_no_docs_short_circuits(self):
-        from memgym.memory.mem0_core import Mem0System
+        from memgym.memory.external.mem0 import Mem0System
         cls, _ = _install_fake_mem0(self._monkey)
         s = Mem0System(llm_model="gpt-4o-mini")
         result = s.retrieve("any question")
@@ -117,7 +117,7 @@ class TestMem0SystemAddRetrieve(unittest.TestCase):
         cls.from_config.assert_not_called()
 
     def test_retrieve_handles_dict_with_results_key(self):
-        from memgym.memory.mem0_core import Mem0System
+        from memgym.memory.external.mem0 import Mem0System
         _, _ = _install_fake_mem0(
             self._monkey,
             search_return={"results": [
@@ -130,7 +130,7 @@ class TestMem0SystemAddRetrieve(unittest.TestCase):
         self.assertEqual(passages, ["fact A", "fact B"])
 
     def test_retrieve_handles_bare_list(self):
-        from memgym.memory.mem0_core import Mem0System
+        from memgym.memory.external.mem0 import Mem0System
         _install_fake_mem0(
             self._monkey,
             search_return=[{"memory": "fact A"}, {"text": "fact B"}],
@@ -141,7 +141,7 @@ class TestMem0SystemAddRetrieve(unittest.TestCase):
         self.assertEqual(passages, ["fact A", "fact B"])
 
     def test_retrieve_passes_limit(self):
-        from memgym.memory.mem0_core import Mem0System
+        from memgym.memory.external.mem0 import Mem0System
         _, inst = _install_fake_mem0(self._monkey)
         s = Mem0System(llm_model="gpt-4o-mini", retrieve_k=3)
         s.add_doc("doc-1", "alpha")
@@ -161,7 +161,7 @@ class TestMem0SystemReset(unittest.TestCase):
         _restore_fake_mem0(self._monkey)
 
     def test_reset_rotates_user_id(self):
-        from memgym.memory.mem0_core import Mem0System
+        from memgym.memory.external.mem0 import Mem0System
         _install_fake_mem0(self._monkey)
         s = Mem0System(llm_model="gpt-4o-mini")
         old_user = s._user_id

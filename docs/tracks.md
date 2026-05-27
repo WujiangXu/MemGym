@@ -3,7 +3,7 @@
 MemGym evaluates memory across five agent tracks. Three **wrap** existing
 benchmarks; two are **in-house synthetic** pipelines with length-controllable
 difficulty. This page is the map from track → module → data → run command. For
-copy-pasteable, tier-labeled commands see [`../TESTING.md`](../TESTING.md); for
+copy-pasteable, tier-labeled commands see [`testing.md`](testing.md); for
 the data each track produces or consumes see [data.md](data.md).
 
 | Track | Module | Data source | Paper |
@@ -19,21 +19,21 @@ the data each track produces or consumes see [data.md](data.md).
 ### SWE-Gym (code repair)
 Runs an agent on SWE-bench/SWE-Gym instances and evaluates patches with the
 **official `swebench` harness** (same pipeline as sb-cli / the leaderboard).
-Entry: `python scripts/evaluate_swe_bench.py … -o results/<name>` (`-o` required;
+Entry: `python examples/swe_bench/evaluate_swe_bench.py … -o results/<name>` (`-o` required;
 `--dataset {lite,verified,full,swe-gym,swe-smith}`). See README "SWE-bench
-Evaluation" and `TESTING.md` Tier 3.
+Evaluation" and `testing.md` Tier 3.
 
 ### τ²-bench (dialogue)
 Wraps `sierra-research/tau2-bench` agents. Solo-mode domains (mock, telecom) run
 a single agent; airline/retail add a user simulator, and `--memory_side` selects
 whose memory is wrapped. Entry: `python -m memgym.gym.tau2_bench --domains …
---agent_llm …`. See `QUICKSTART.md` and `TESTING.md` Tier 2.
+--agent_llm …`. See `quickstart.md` and `testing.md` Tier 2.
 
 ### WebArena-Infinity (web navigation)
 Wraps WebArena-Infinity; needs the package installed
 (`python -m memgym.gym.webarena.install`) and a running WebArena server
 (`WEBARENA_BASE_URL`). Entry: `python -m memgym.gym.webarena --policy_model …
---app_name …` (both required). See `TESTING.md` Tier 3.
+--app_name …` (both required). See `testing.md` Tier 3.
 
 ## In-house synthetic tracks
 
@@ -49,7 +49,7 @@ then benchmark IR memory strategies across hop strata:
 python -m memgym.pipelines.memgym_ir dataset --limit 2 --output data/dr_smoke
 
 # Benchmark (one JSONL per hop stratum: --data-3hop/--data-4hop/--data-56hop)
-python scripts/run_ir_benchmark.py \
+python examples/memgym_dr/run_ir_benchmark.py \
     --data-4hop data/dr_smoke/memgym_ir_instances.jsonl \
     --strategies ir_bm25,ir_naive_rag,ir_summarizing \
     --limit 2 --output data/dr_results.json

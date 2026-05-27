@@ -13,7 +13,7 @@ directly so this pipeline owns the answerer.
 from typing import Any, Dict, List, Optional
 
 from ..base import BaseMemoryManager, FilteredContext, register_memory_model
-from ..simplemem_core.system import SimpleMemBackend
+from ..external.simplemem.system import SimpleMemBackend
 
 
 class IRSimpleMemMemory(BaseMemoryManager):

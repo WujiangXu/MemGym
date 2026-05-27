@@ -219,7 +219,7 @@ _TAG_INTERACTIVE_JS = r"""
     return tag;
   };
 
-  // ----- the training phase: standard interactive selectors --------------------------
+  // ----- Phase 1: standard interactive selectors --------------------------
   const nodes = Array.from(document.querySelectorAll(SELECTOR)).filter(isVisible);
 
   const out = [];
@@ -245,7 +245,7 @@ _TAG_INTERACTIVE_JS = r"""
     });
   });
 
-  // ----- the training phase: clickable container divs --------------------------------
+  // ----- Phase 2: clickable container divs --------------------------------
   // Many modern web apps (gitlab-plan-and-track, list views, card grids)
   // attach click handlers to plain <div> / <li> rows with no <a>, <button>,
   // or role attribute. The first phase misses these entirely, so the agent
@@ -361,7 +361,7 @@ class WebArenaMemoryEnv(BaseMemoryEnvironment):
             shared by every worker process in a batch.
         observation_mode: "text" (default) returns an accessibility-tree
             snapshot + current URL. "vision" returns a base64 PNG screenshot.
-        headless: Run Chromium headless. Always True on EC2 (no display).
+        headless: Run Chromium headless. Always True on headless servers (no display).
         max_a11y_chars: Truncate the accessibility tree to this many chars
             to avoid unbounded per-step observations on giant pages.
         memory_state: Optional BaseMemoryState for the env's own bookkeeping

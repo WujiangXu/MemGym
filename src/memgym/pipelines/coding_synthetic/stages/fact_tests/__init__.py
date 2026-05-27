@@ -12,7 +12,7 @@ modes are distinguished:
   - **assertion failure**
       → the fact is probably wrong about the code
 
-The gate is advisory: the training phase's P7 flags instances where >50% of
+The gate is advisory: Phase 2's P7 flags instances where >50% of
 tested facts fail assertions as needing review. Nothing is auto-dropped.
 """
 from __future__ import annotations

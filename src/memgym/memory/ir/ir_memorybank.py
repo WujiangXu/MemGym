@@ -11,7 +11,7 @@ get retrieved across multiple sub-questions of one multi-hop query.
 from typing import Any, Dict, List, Optional
 
 from ..base import BaseMemoryManager, FilteredContext, register_memory_model
-from ..memorybank_core.system import MemoryBankSystem
+from ..external.memorybank.system import MemoryBankSystem
 
 
 class IRMemoryBankMemory(BaseMemoryManager):

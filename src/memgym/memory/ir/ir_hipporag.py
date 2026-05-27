@@ -11,7 +11,7 @@ on first call, then runs PPR-ranked retrieval over the resulting graph.
 from typing import Any, Dict, List, Optional
 
 from ..base import BaseMemoryManager, FilteredContext, register_memory_model
-from ..hipporag_core.system import HippoRAGSystem
+from ..external.hipporag.system import HippoRAGSystem
 
 
 class IRHippoRAGMemory(BaseMemoryManager):

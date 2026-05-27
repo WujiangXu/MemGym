@@ -574,7 +574,7 @@ class CodingQAInstance(BaseModel):
         description="Target token budget used for expansion (None=no expansion)",
     )
 
-    # Runtime fact verification (the training phase — advisory; populated by stages/fact_tests)
+    # Runtime fact verification (Phase 3 — advisory; populated by stages/fact_tests)
     fact_test_results: Dict[str, Dict] = Field(
         default_factory=dict,
         description="fact_id -> FactTestResult.model_dump(); absent=not tested",

@@ -107,11 +107,9 @@ def assign_splits(
 
 
 # Fork-source-dir → trajectory-root-dir under data/world_model/trajectories/.
-# Verified at 100% coverage by scan_replay_coverage.py over the 846 unique
-# (source_dir, instance_id) pairs in aug_sft_pairs.jsonl. Identical to
-# summarizer_pairs.SOURCE_DIR_TO_TRAJ_ROOT — kept local to avoid a circular
-# import and to allow the training phase reward-model and the training phase summarizer pipelines
-# to evolve independently.
+# Verified at 100% coverage over the 846 unique (source_dir, instance_id)
+# pairs in aug_sft_pairs.jsonl. Kept inline (rather than shared) so the
+# dataset builders avoid a circular import and can evolve independently.
 FORK_TO_TRAJDIR: Dict[str, str] = {
     "sonnet_fork_gap554_scaleA_v1":      "fork_sonnet45_llmsumm_gap554_v2",
     "gptoss_fork_gap554_scaleA_v1":      "fork_gptoss_llmsumm_gap554_v2",
@@ -503,7 +501,7 @@ def _build_row(
         "perturbation": src_row.get("perturbation", ""),
         "label": label,
         "completion": completion,
-        "target": completion,  # legacy column for GRPO/eval
+        "target": completion,  # legacy column for eval
         "messages": full_messages,
         "prompt": flat_prompt,
         "input": flat_prompt[: -len(RESPONSE_PREFIX)],  # legacy alias
@@ -518,7 +516,7 @@ def _build_row(
         "provenance": {
             "training_path": str(cache.training_path),
             "replay_path": str(cache.replay_path),
-            "build_view_fn": "memgym.memory.llm_summarizing.build_view",
+            "build_view_fn": "memgym.memory.strategies.llm_summarizing.build_view",
             "build_script": "src/memgym/training/data/reward_model_pairs.py",
             "keep_first": keep_first,
         },

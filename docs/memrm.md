@@ -65,7 +65,7 @@ tok = AutoTokenizer.from_pretrained("MemGym/memgym-rm-1p7b")
 # P(HARMFUL) = softmax over the " Y"/" N" logits at the final position
 ```
 
-A higher-level Python API (`MemoryWorldModel.from_checkpoint`, `WorldModelGate`,
+A higher-level Python API (`MemoryWorldModel.from_checkpoint`,
 `WorldModelEvaluator`) lives in `src/memgym/training/models/world_model.py`.
 
 ## Scoring your own memory strategy against MemRM
@@ -74,7 +74,7 @@ Use `memgym-eval-memory` to score a memory strategy on a raw-trajectory JSONL.
 The signal is the **AUROC delta** between two strategies on the same file (the RM
 was trained without a memory-output block, so absolute numbers drift from the
 table above — the CLI prints this caveat). See the README section
-"Evaluating your own memory against MemRM" and `TESTING.md` Tier 2.
+"Evaluating your own memory against MemRM" and `testing.md` Tier 2.
 
 ## Discrepancies
 

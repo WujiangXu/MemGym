@@ -1,7 +1,7 @@
 """
 Replay-determinism probe for WebArena-Infinity baseline trajectories.
 
-the baseline-train phase of the "trajectory-prefix + memory continuation" experimental plan:
+Motivation for the "trajectory-prefix + memory continuation" design:
 BEFORE building a runner that force-executes a recorded trajectory prefix
 and then hands off to a live agent + memory strategy, we need to know
 **whether raw element-ID replay is deterministic**. If it is, we can skip
@@ -42,9 +42,9 @@ Top-level fields:
 This intentionally produces a three-way conclusion per trajectory:
 
 - all steps match AND final reward matches -> "deterministic" (proceed
-  with raw-ID replay in Phase C without stable-selector fallback)
+  with raw-ID prefix injection without stable-selector fallback)
 - at least one step diverged -> "diverged" (add stable-selector fallback
-  before Phase C is safe)
+  before prefix injection is safe)
 - Playwright/server raised unexpectedly -> "replay_error" (infra issue,
   not a determinism statement)
 """

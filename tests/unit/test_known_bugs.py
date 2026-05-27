@@ -40,7 +40,7 @@ def test_observation_masking_preserves_tool_call_id():
         carries the same ``tool_call_id`` it had on input and keeps
         ``role='tool'``.
     """
-    from memgym.memory.observation_masking import ObservationMaskingMemory
+    from memgym.memory.strategies.observation_masking import ObservationMaskingMemory
 
     mem = ObservationMaskingMemory(
         attention_window=1, keep_first=1, selective=False, max_tokens=4000,
@@ -76,7 +76,7 @@ def test_naive_summarization_preserves_system_prompt():
     Contract: With keep_first >= 1, ``out.content[0]`` is the original
         system message verbatim, even when summarization fires.
     """
-    from memgym.memory.naive_summarization import NaiveSummarizationMemory
+    from memgym.memory.strategies.naive_summarization import NaiveSummarizationMemory
 
     class _StubBackend:
         def summarize(self, system: str, user: str, max_tokens: int = 1024) -> str:
@@ -110,10 +110,10 @@ def test_sliding_window_summary_emits_user_role():
     Contract: After the strategy compacts, any summary message it
         inserts uses ``role='user'`` (never ``'system'``).
     """
-    from memgym.memory.sliding_window_summary import (
+    from memgym.memory.strategies.sliding_window_summary import (
         SUMMARY_MARKER, SlidingWindowSummaryMemory,
     )
-    from memgym.memory import sliding_window_summary as sws_mod
+    from memgym.memory.strategies import sliding_window_summary as sws_mod
 
     def _fake_completion(*_a, **_kw):
         class _M: content = "[FAKE]"

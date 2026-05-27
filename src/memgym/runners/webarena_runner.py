@@ -18,15 +18,14 @@ compared on apples-to-apples trajectories:
        d. recorder.record_step(...)
        e. history.append({observation, action, reward, info})
     4. Save trajectory JSON (matching TrajectoryRecorder schema so
-       TrajectoryRecorder.from_file() round-trips cleanly — plan verification
-       step 4)
+       TrajectoryRecorder.from_file() round-trips cleanly)
     5. Return episode result dict
 
 The observation/action shapes are whatever `WebArenaMemoryEnv` and
 `WebArenaAgent` agreed on; this runner makes no assumptions about them
 beyond what `BaseRunner` does.
 
-PREFIX-REPLAY design rationale: the baseline-train phase (`replay_probe.py`) established that
+PREFIX-REPLAY design rationale: the replay-determinism probe (`replay_probe.py`) established that
 95 baseline trajectories re-executed element-ID by element-ID reach the
 same verifier reward even when the a11y tree drifts by a few elements
 (60 % byte-deterministic but 100 % reward-deterministic). So "prefix
@@ -89,7 +88,7 @@ class WebArenaRunner(BaseRunner):
             verbose=verbose,
         )
         self.max_steps = max_steps
-        # Phase C prefix-injection parameters. When `prefix_trajectory_dir`
+        # Prefix-injection parameters. When `prefix_trajectory_dir`
         # is set, run_episode() looks up `<dir>/<task_id>/trajectory.json`
         # and replays the first K recorded actions before handing off to
         # the live agent. `prefix_steps` is absolute; if None, K is rounded
@@ -322,7 +321,7 @@ class WebArenaRunner(BaseRunner):
                     "LIVE" if (smart_replay_info["divergence_step"] and not done) else "DONE",
                 )
 
-        # --- PREFIX REPLAY PHASE (Phase C — optional) ---
+        # --- PREFIX REPLAY PHASE (optional) ---
         # If a recorded trajectory is available for this task, replay its
         # first K actions deterministically. memory.manage_context still
         # runs at every prefix step so its view at handoff is the natural
@@ -395,7 +394,7 @@ class WebArenaRunner(BaseRunner):
                     truncated = trunc
 
                     # 3. Recorder tags the step as prefix_replay via
-                    #    reasoning_action.mode — Phase C analyzers use this
+                    #    reasoning_action.mode — prefix-injection analyzers use this
                     #    to split trajectories into "prefix" and "tail".
                     self.recorder.record_step(
                         observation=_json_safe(obs),

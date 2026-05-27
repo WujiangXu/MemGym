@@ -61,3 +61,7 @@ third_party/OpenHands/
 third_party/tau2-bench/
 third_party/webarena/
 third_party/llmlingua-2/
+# Not vendored: SWE-Bench-Fork (unused; specs internalized in utils/swegym_specs.py)
+# and LightMem (now the `lightmem` pip extra — pip install 'memgym[lightmem]').
+third_party/SWE-Bench-Fork/
+third_party/LightMem/

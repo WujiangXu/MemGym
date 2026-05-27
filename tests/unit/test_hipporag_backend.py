@@ -81,12 +81,12 @@ class TestHippoRAGSystemInit(unittest.TestCase):
                 os.environ[k] = v
 
     def test_strips_openai_prefix(self):
-        from memgym.memory.hipporag_core import HippoRAGSystem
+        from memgym.memory.external.hipporag import HippoRAGSystem
         sys_ = HippoRAGSystem(llm_model="openai/gpt-4o-mini")
         self.assertEqual(sys_._llm_model, "gpt-4o-mini")
 
     def test_leaves_unprefixed_model_alone(self):
-        from memgym.memory.hipporag_core import HippoRAGSystem
+        from memgym.memory.external.hipporag import HippoRAGSystem
         sys_ = HippoRAGSystem(llm_model="gpt-4o-mini")
         self.assertEqual(sys_._llm_model, "gpt-4o-mini")
 
@@ -94,7 +94,7 @@ class TestHippoRAGSystemInit(unittest.TestCase):
         """Only the litellm-style `openai/` prefix is special; bedrock/,
         anthropic/, etc. shouldn't be touched (they would be a config
         error here anyway, but we want to fail loudly downstream)."""
-        from memgym.memory.hipporag_core import HippoRAGSystem
+        from memgym.memory.external.hipporag import HippoRAGSystem
         sys_ = HippoRAGSystem(llm_model="bedrock/claude-haiku")
         self.assertEqual(sys_._llm_model, "bedrock/claude-haiku")
 
@@ -102,7 +102,7 @@ class TestHippoRAGSystemInit(unittest.TestCase):
         """The earlier `setdefault` bug let a stale env key shadow an
         explicit ctor arg. After the fix, the ctor arg must win."""
         os.environ["OPENAI_API_KEY"] = "sk-stale-rotten-key"
-        from memgym.memory.hipporag_core import HippoRAGSystem
+        from memgym.memory.external.hipporag import HippoRAGSystem
         HippoRAGSystem(llm_model="gpt-4o-mini", api_key="sk-fresh-key")
         self.assertEqual(os.environ["OPENAI_API_KEY"], "sk-fresh-key")
 
@@ -111,13 +111,13 @@ class TestHippoRAGSystemInit(unittest.TestCase):
         legitimately-pre-existing env var (the smoke harness relies on
         this)."""
         os.environ["OPENAI_API_KEY"] = "sk-from-shell"
-        from memgym.memory.hipporag_core import HippoRAGSystem
+        from memgym.memory.external.hipporag import HippoRAGSystem
         HippoRAGSystem(llm_model="gpt-4o-mini")
         self.assertEqual(os.environ["OPENAI_API_KEY"], "sk-from-shell")
 
     def test_explicit_api_base_overrides_env(self):
         os.environ["OPENAI_API_BASE"] = "https://stale.example/v1"
-        from memgym.memory.hipporag_core import HippoRAGSystem
+        from memgym.memory.external.hipporag import HippoRAGSystem
         HippoRAGSystem(
             llm_model="gpt-4o-mini",
             api_base="https://fresh.example/v1",
@@ -140,7 +140,7 @@ class TestHippoRAGSystemBuffering(unittest.TestCase):
         _restore_fake_hipporag(self._monkey)
 
     def test_add_doc_does_not_create_system(self):
-        from memgym.memory.hipporag_core import HippoRAGSystem
+        from memgym.memory.external.hipporag import HippoRAGSystem
         ctor, _ = _install_fake_hipporag(self._monkey)
         s = HippoRAGSystem(llm_model="gpt-4o-mini")
         s.add_doc("doc-1", "hello world")
@@ -150,7 +150,7 @@ class TestHippoRAGSystemBuffering(unittest.TestCase):
         self.assertFalse(s._committed)
 
     def test_empty_text_is_skipped(self):
-        from memgym.memory.hipporag_core import HippoRAGSystem
+        from memgym.memory.external.hipporag import HippoRAGSystem
         _install_fake_hipporag(self._monkey)
         s = HippoRAGSystem(llm_model="gpt-4o-mini")
         s.add_doc("doc-1", "")
@@ -158,7 +158,7 @@ class TestHippoRAGSystemBuffering(unittest.TestCase):
         self.assertEqual(s._buffered_docs, [])
 
     def test_retrieve_with_no_docs_short_circuits(self):
-        from memgym.memory.hipporag_core import HippoRAGSystem
+        from memgym.memory.external.hipporag import HippoRAGSystem
         ctor, _ = _install_fake_hipporag(self._monkey)
         s = HippoRAGSystem(llm_model="gpt-4o-mini")
         result = s.retrieve("any question")
@@ -167,8 +167,8 @@ class TestHippoRAGSystemBuffering(unittest.TestCase):
 
     def test_retrieve_lazy_commits_exactly_once(self):
         """3 add_doc calls + 2 retrieves should produce exactly 1 index()
-        call. This is the core of the the training phase cost story."""
-        from memgym.memory.hipporag_core import HippoRAGSystem
+        call. This is the core of the Phase-5 cost story."""
+        from memgym.memory.external.hipporag import HippoRAGSystem
         _, fake_instance = _install_fake_hipporag(
             self._monkey,
             retrieved_docs=["doc-A", "doc-B"],
@@ -184,7 +184,7 @@ class TestHippoRAGSystemBuffering(unittest.TestCase):
         self.assertEqual(fake_instance.index.call_count, 1)
 
     def test_add_doc_after_commit_re_indexes_on_next_retrieve(self):
-        from memgym.memory.hipporag_core import HippoRAGSystem
+        from memgym.memory.external.hipporag import HippoRAGSystem
         _, fake_instance = _install_fake_hipporag(
             self._monkey, retrieved_docs=["x"],
         )
@@ -206,7 +206,7 @@ class TestHippoRAGSystemDefensiveRetrieve(unittest.TestCase):
         _restore_fake_hipporag(self._monkey)
 
     def _system_with_retrieve_error(self, exc: BaseException):
-        from memgym.memory.hipporag_core import HippoRAGSystem
+        from memgym.memory.external.hipporag import HippoRAGSystem
         _install_fake_hipporag(
             self._monkey, retrieve_side_effect=exc,
         )
@@ -256,7 +256,7 @@ class TestHippoRAGSystemReset(unittest.TestCase):
         _restore_fake_hipporag(self._monkey)
 
     def test_reset_drops_buffer_and_system(self):
-        from memgym.memory.hipporag_core import HippoRAGSystem
+        from memgym.memory.external.hipporag import HippoRAGSystem
         _install_fake_hipporag(self._monkey, retrieved_docs=["x"])
         s = HippoRAGSystem(llm_model="gpt-4o-mini")
         s.add_doc("doc-1", "alpha")

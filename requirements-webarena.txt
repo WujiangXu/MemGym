@@ -15,5 +15,5 @@ pytest-playwright>=0.4
 # memgym core, listed here for clarity).
 litellm>=1.40
 
-# boto3 — required for Bedrock-hosted models used in the EC2 runs
+# boto3 — required for Bedrock-hosted models
 boto3>=1.34

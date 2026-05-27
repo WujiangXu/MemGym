@@ -131,7 +131,7 @@ def config() -> argparse.Namespace:
                         help="Port range for the server pool (inclusive-exclusive).")
     parser.add_argument("--spawn_timeout_sec", type=float, default=30.0)
     parser.add_argument("--max_workers", type=int, default=4,
-                        help="Hard ceiling on workers (defends against accidentally swamping EC2).")
+                        help="Hard ceiling on workers (defends against accidentally swamping the server pool).")
 
     # Observation replay (offline memory-strategy evaluation)
     parser.add_argument(
@@ -156,27 +156,27 @@ def config() -> argparse.Namespace:
              "policy calls vs full live runs.",
     )
 
-    # Prefix-injection (Phase C — replay-first-K-steps experiment)
+    # Prefix-injection (replay-first-K-steps experiment)
     parser.add_argument(
         "--prefix_trajectory_dir", type=str, default="",
-        help="Phase C: directory containing recorded baseline trajectories "
+        help="Prefix-injection mode: directory containing recorded baseline trajectories "
              "(layout: <dir>/<task_id>/trajectory.json). When set, the runner "
              "deterministically replays the first K recorded actions per task "
              "before handing off to the live agent + memory strategy. "
              "K is controlled by --prefix_steps (absolute) or --prefix_fraction. "
-             "Gated by the the baseline-train phase replay-determinism probe result: every "
+             "Gated by the replay-determinism probe result: every "
              "replayed trajectory reaches the same verifier reward as its "
              "recording, even when the a11y tree drifts slightly. See "
-             "docs/webarena/progress.md the baseline-train phase section.",
+             "replay_probe.py for the determinism check.",
     )
     parser.add_argument(
         "--prefix_steps", type=int, default=-1,
-        help="Phase C: absolute number of recorded actions to replay before "
+        help="Prefix-injection mode: absolute number of recorded actions to replay before "
              "handing off. -1 (default) means use --prefix_fraction instead.",
     )
     parser.add_argument(
         "--prefix_fraction", type=float, default=0.5,
-        help="Phase C: fraction of the recorded trajectory length to replay as "
+        help="Prefix-injection mode: fraction of the recorded trajectory length to replay as "
              "prefix. Ignored when --prefix_steps >= 0. Default 0.5 gives a "
              "mid-trajectory handoff that is task-length-normalized.",
     )
@@ -419,7 +419,7 @@ def run_worker(
                 headless=args.headless,
             )
 
-            # Phase C: thread prefix-injection args from CLI -> runner.
+            # Prefix-injection: thread args from CLI -> runner.
             # `prefix_steps < 0` is the CLI "unset" sentinel; we hand None
             # to the runner so it falls back to `prefix_fraction`.
             prefix_dir = Path(args.prefix_trajectory_dir) / app_name if args.prefix_trajectory_dir else None

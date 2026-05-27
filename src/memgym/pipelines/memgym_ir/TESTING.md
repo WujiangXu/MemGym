@@ -21,26 +21,26 @@ Expected: Loads MuSiQue, filters ~50 raw to ~4 instances (>=3 hops), generates q
 
 ---
 
-## Test 2: Full Pipeline via EC2 (Claude Bedrock)
+## Test 2: Full Pipeline via the job-runner API (Claude Bedrock)
 
-Submit to EC2 server which has Bedrock credentials:
+Submit to a job-runner server that holds Bedrock credentials:
 
 ```bash
-EC2=http://<YOUR_EC2_HOST>:30000
+SERVER=http://<YOUR_HOST>:30000
 
 # Skip verification (cheaper)
-curl -X POST $EC2/run-ir-pipeline -H "Content-Type: application/json" \
+curl -X POST $SERVER/run-ir-pipeline -H "Content-Type: application/json" \
   -d '{"limit": 50, "skip_verification": true, "output": "results/ir_test"}'
 
 # Full with verification
-curl -X POST $EC2/run-ir-pipeline -H "Content-Type: application/json" \
+curl -X POST $SERVER/run-ir-pipeline -H "Content-Type: application/json" \
   -d '{"limit": 50, "output": "results/ir_full_test", "difficulty": "medium"}'
 
 # Check job status
-curl $EC2/jobs
+curl $SERVER/jobs
 
 # Download quality report
-curl $EC2/download/ir_test/quality_report.md
+curl $SERVER/download/ir_test/quality_report.md
 ```
 
 ---
@@ -48,7 +48,7 @@ curl $EC2/download/ir_test/quality_report.md
 ## Test 3: Batch Jobs (IR + Coding + SWE-gym in parallel)
 
 ```bash
-curl -X POST $EC2/batch-jobs -H "Content-Type: application/json" -d '{
+curl -X POST $SERVER/batch-jobs -H "Content-Type: application/json" -d '{
   "jobs": [
     {"run_ir_pipeline": {"limit": 50, "output": "results/ir_test"}},
     {"run_pipeline": {"limit": 20, "output": "results/coding_test"}},

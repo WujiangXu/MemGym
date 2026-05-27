@@ -727,7 +727,7 @@ def expand_qa_instance(
             "llm" calls the model for prose (legacy behaviour), "hybrid" tries
             local first and falls back to LLM if the pool is exhausted.
         distractor_pool: Optional pre-built cross-instance pool. When provided,
-            the training phase/3 sample from it before falling back to per-instance LLM
+            Phase 2/3 sample from it before falling back to per-instance LLM
             generation, cutting LLM calls roughly 10-30x.
         seed: Optional RNG seed for deterministic filler sampling.
 
@@ -754,7 +754,7 @@ def expand_qa_instance(
     all_distractors = list(instance.distractors)
     repo_files = dict(instance.repo_files)
 
-    # the training phase: Include more repo files (high-quality context padding)
+    # Phase 1: Include more repo files (high-quality context padding)
     if instance.repo_files:
         # Budget for repo files: up to 70% of the deficit
         deficit = target_tokens - current
@@ -770,7 +770,7 @@ def expand_qa_instance(
         for content in repo_files.values():
             current += count_tokens(content)
 
-    # the training phase: Generate more adversarial QA distractors
+    # Phase 2: Generate more adversarial QA distractors
     deficit = target_tokens - current
     extra_per_q = max(1, min(5, deficit // (50 * max(1, len(instance.qa_pairs)))))
     if deficit > 1000 and instance.qa_pairs:
@@ -802,7 +802,7 @@ def expand_qa_instance(
     for content in repo_files.values():
         current += count_tokens(content)
 
-    # the training phase: Generic adversarial distractors via expand.py
+    # Phase 3: Generic adversarial distractors via expand.py
     deficit = target_tokens - current
     if deficit > 2000:
         max_new = min(deficit // 50, 50)
@@ -839,7 +839,7 @@ def expand_qa_instance(
     for content in repo_files.values():
         current += count_tokens(content)
 
-    # the training phase: Pad memory files to hit the budget. Default uses real source
+    # Phase 4: Pad memory files to hit the budget. Default uses real source
     # excerpts (no LLM); legacy LLM mode is opt-in via filler_mode="llm".
     deficit = target_tokens - current
     if deficit > 500 and memory_files:
@@ -850,7 +850,7 @@ def expand_qa_instance(
         if filler_mode in ("local", "hybrid"):
             # Build a pool of (path, source) excerpts from this instance's
             # repo_files, excluding files we already injected as repo context
-            # (the training phase) and the actual referenced files (signal-bearing).
+            # (Phase 1) and the actual referenced files (signal-bearing).
             excluded = set(repo_files.keys()) | set(instance.referenced_files or [])
             filler_pool = [
                 (p, s) for p, s in instance.repo_files.items() if p not in excluded

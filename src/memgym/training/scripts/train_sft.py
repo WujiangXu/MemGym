@@ -132,7 +132,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--aug-dir", action="append", dest="aug_dirs", type=Path, default=None,
-        help="Augmentation output dir (repeatable). Defaults to the 3 scaleA EC2 dirs.",
+        help="Augmentation output dir (repeatable). Defaults to the 3 scaleA dirs.",
     )
     parser.add_argument("--out-dir", type=Path, default=Path("training_output/aug_sft"))
     parser.add_argument("--pairs-out", type=Path, default=None,

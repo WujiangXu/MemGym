@@ -72,14 +72,14 @@ except ImportError as _e:
         "ir_amem unavailable (pip install -r requirements-amem.txt to enable): %s", _e
     )
 
-# LightMem is an optional dependency (third_party/LightMem must be installed).
+# LightMem is an optional dependency (pip install lightmem, in a Python<3.12 venv).
 # Soft-fail so the rest of the registry still loads when it's missing.
 try:
     from .ir_lightmem import IRLightMemMemory  # noqa: F401, E402
 except ImportError as _e:
     import logging as _logging
     _logging.getLogger(__name__).warning(
-        "ir_lightmem unavailable (skip pip install -e third_party/LightMem to enable): %s", _e
+        "ir_lightmem unavailable (pip install lightmem in a Python<3.12 venv to enable): %s", _e
     )
 
 # HippoRAG / SimpleMem are heavy optional deps (gated behind requirements-amem.txt).
