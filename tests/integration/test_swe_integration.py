@@ -143,7 +143,7 @@ def test_dataset_loading():
             from datasets import load_dataset
         except ImportError:
             print("   SKIP - datasets package not installed")
-            print("   Install with: pip install datasets")
+            print("   Install with: uv pip install datasets")
             return True  # Not a failure, just skip
 
         from memgym.envs import SWEMemoryEnv

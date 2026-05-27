@@ -160,7 +160,7 @@ class NaiveSummarizationMemory(BaseMemoryManager):
         self.keep_first = keep_first
 
         # Pluggable summarizer. Default mirrors pre-refactor litellm behavior;
-        # (see paper) RL loop passes a LocalHFSummarizerBackend instead to
+        # the RL loop passes a LocalHFSummarizerBackend instead to
         # hot-swap the trained 8B checkpoint per rollout.
         self.summarizer_backend: SummarizerBackend = (
             summarizer_backend if summarizer_backend is not None

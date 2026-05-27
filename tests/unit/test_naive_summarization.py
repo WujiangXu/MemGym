@@ -126,7 +126,7 @@ class TestNaiveSummarizationMemory(unittest.TestCase):
 class TestSummarizerBackendInjection(unittest.TestCase):
     """Contract tests for the pluggable SummarizerBackend interface.
 
-    These pin the behavior (see paper) depends on: NaiveSummarizationMemory
+    These pin the behavior the runtime depends on: NaiveSummarizationMemory
     must accept any object satisfying the Protocol, default to litellm, and
     not hard-code a particular backend.
     """

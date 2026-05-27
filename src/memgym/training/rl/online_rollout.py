@@ -1,4 +1,4 @@
-"""Async batch rollout pool for the (see paper) GRPO loop.
+"""Async batch rollout pool for the GRPO loop.
 
 The GRPO outer loop wants `N rollouts × M instances` `EpisodeResult`s
 per batch. Each rollout is one full SWEMemoryEnv episode (Docker

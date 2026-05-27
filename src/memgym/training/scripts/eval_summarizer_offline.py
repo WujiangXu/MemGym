@@ -1,4 +1,4 @@
-"""Intrinsic eval for a summarizer LoRA checkpoint ((see paper)).
+"""Intrinsic eval for a summarizer LoRA checkpoint.
 
 Purpose — give the collaborator a no-Qwen3.6, no-vLLM signal they can run
 on their training node to track progress during SFT or offline RL. Three

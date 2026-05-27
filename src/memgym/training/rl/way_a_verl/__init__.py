@@ -1,4 +1,4 @@
-"""VeRL adapter package for (see paper) Way A (agent-RL on SWE-Gym).
+"""VeRL adapter package for Way A (agent-RL on SWE-Gym).
 
 Way A trains the agent itself end-to-end: the policy IS the SWE-Bench
 agent, AND the same policy summarizes its own context when the conversation

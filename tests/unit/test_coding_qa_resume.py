@@ -29,6 +29,14 @@ from pathlib import Path
 from typing import List
 from unittest.mock import patch
 
+import pytest
+
+pytest.importorskip(
+    "unidiff",
+    reason="coding-synth pipeline pulls in `unidiff` (under the `swe` extras). "
+           "Install with `uv pip install -e .[swe]` to run this suite.",
+)
+
 from memgym.pipelines.coding_synthetic.stages.qa import eval as eval_mod
 from memgym.pipelines.coding_synthetic.types.schemas import (
     CodingQAInstance,

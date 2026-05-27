@@ -766,8 +766,8 @@ class SWEMemoryEnv(BaseMemoryEnvironment):
             litellm.modify_params = True
             os.environ.setdefault("MSWEA_COST_TRACKING", "ignore_errors")
 
-        # Self-hosted OpenAI-compatible endpoints (e.g. vLLM for (see paper)
-        # memory A/B) have no litellm price entry, so mini-swe-agent's cost
+        # Self-hosted OpenAI-compatible endpoints (e.g. vLLM for the
+        # memory A/B harness) have no litellm price entry, so mini-swe-agent's cost
         # tracker raises on every response. Default to ignore_errors when
         # OPENAI_API_BASE points at a non-Anthropic, non-OpenAI server.
         api_base = os.environ.get("OPENAI_API_BASE", "")
@@ -1075,7 +1075,7 @@ class SWEMemoryEnv(BaseMemoryEnvironment):
         # content field, which mini-swe-agent's parser can't handle.
         #
         # Self-hosted Qwen reasoning models (e.g. `openai/qwen36-35b-a3b-fp8`
-        # served by vLLM for the (see paper) memory A/B) also need text mode:
+        # served by vLLM for the memory A/B harness) also need text mode:
         # vLLM rejects `tool_choice="auto"` unless launched with
         # `--enable-auto-tool-choice --tool-call-parser`, and the backticks
         # config omits the `parallel_tool_calls` flag that triggers litellm

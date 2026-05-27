@@ -38,7 +38,7 @@ def _ns(**overrides) -> argparse.Namespace:
 
 class TestBuildMemoryModel(unittest.TestCase):
     def test_default_litellm_falls_back_to_agent_llm(self):
-        """(see paper) legacy path: no --summarization-model → use --agent-llm."""
+        """Legacy path: no --summarization-model → use --agent-llm."""
         mm = _build_memory_model(_ns())
         self.assertIsInstance(mm, NaiveSummarizationMemory)
         self.assertIsInstance(mm.summarizer_backend, LitellmSummarizerBackend)
@@ -70,7 +70,7 @@ class TestBuildMemoryModel(unittest.TestCase):
 
 
 class TestMemoryStrategy(unittest.TestCase):
-    """Dispatch on `--memory-strategy` — (see paper) extra baselines."""
+    """Dispatch on `--memory-strategy` — extra baselines."""
 
     def test_structured_strategy_instantiates(self):
         mm = _build_memory_model(_ns(memory_strategy="structured"))

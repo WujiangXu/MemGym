@@ -1,4 +1,4 @@
-"""Tests for the (see paper) GRPO advantage prep.
+"""Tests for the GRPO advantage prep.
 
 Pure-Python tests on `prepare_advantages` only — `snapshot_old_logprobs`
 and `grpo_step` need a real torch model, exercised in the EC2 smoke

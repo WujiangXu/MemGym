@@ -1,4 +1,4 @@
-"""Online RL orchestrator for the (see paper) summarizer (memory-RL).
+"""Online RL orchestrator for the summarizer (memory-RL).
 
 EC2 validation: a single-node, single-policy driver that exercises all
 pieces — rollout pool, advantage prep, old-logprob snapshot, GRPO step

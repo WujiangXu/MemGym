@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit-tests:
+    name: Unit tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.12"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install package + dev/eval extras
+        # The 'dev' extras pull pytest. The 'eval' extras pull the
+        # lightweight transformers / huggingface_hub stack the MemRM
+        # CLI smoke tests use. Skipping the heavy 'train' / 'rl-way-a'
+        # extras keeps CI under the 10-minute mark.
+        run: |
+          python -m pip install --upgrade pip uv
+          uv pip install --system -e ".[dev,eval]"
+
+      - name: Run unit tests
+        # -x stops on first real failure; xfailed tests are allowed
+        # (they document open contract bugs).
+        run: pytest tests/unit/ -x --tb=short -rxX
+
+      - name: memgym-eval-rm --help smoke test
+        # Verifies the console script is wired up and that --help works
+        # without torch having to load weights. Catches argparse / entry-
+        # point regressions before they hit users.
+        run: memgym-eval-rm --help

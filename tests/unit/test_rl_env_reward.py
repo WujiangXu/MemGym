@@ -1,4 +1,4 @@
-"""Tests for the (see paper) env-reward wrapper.
+"""Tests for the env-reward wrapper.
 
 Unit-only — no SWEMemoryEnv construction, no docker, no vllm. A tiny
 FakeEnv mimics the contract: exposes `_memory_model` with a

@@ -1,4 +1,4 @@
-"""GRPO update step for the (see paper) online summarizer RL loop.
+"""GRPO update step for the online summarizer RL loop.
 
 Reusable across Way A (agent-RL) and Way B (memory-RL):
 

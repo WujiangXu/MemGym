@@ -1,4 +1,4 @@
-"""Env-reward wrapper for the (see paper) RL summarizer loop.
+"""Env-reward wrapper for the RL summarizer loop.
 
 The RL loop rolls out episodes of `SWEMemoryEnv` with the 8B policy
 plugged in as the summarizer. GRPO needs, per rollout:
@@ -8,8 +8,8 @@ plugged in as the summarizer. GRPO needs, per rollout:
     one scalar terminal reward (did the episode resolve).
 
 Rather than hacking per-manager metadata to surface summary text, we
-decorate the pluggable `summarizer_backend` ((see paper) plumbing
-in `memgym/memory/summarizer_backend.py`). Every `summarize()` call is
+decorate the pluggable `summarizer_backend`
+(`memgym/memory/summarizer_backend.py`). Every `summarize()` call is
 logged at the source — the exact (system, user) strings the policy saw
 — so GRPO can recompute log-probs for the advantage without needing to
 replay the whole episode.

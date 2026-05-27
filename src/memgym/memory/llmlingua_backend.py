@@ -1,4 +1,4 @@
-"""LLMLingua-2 summarizer backend — (see paper) literature baseline.
+"""LLMLingua-2 summarizer backend — literature baseline.
 
 Drops into `NaiveSummarizationMemory.summarizer_backend` as a
 `SummarizerBackend`-compatible object, but unlike the generative

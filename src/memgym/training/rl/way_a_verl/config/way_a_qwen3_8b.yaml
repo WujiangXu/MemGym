@@ -29,7 +29,7 @@ actor_rollout_ref:
     # Sequence-packing optimization. verl 0.7.1's
     # `verl/utils/attention_utils.py:30` hard-imports
     # `flash_attn.bert_padding.unpad_input` when this is true, so it
-    # requires `pip install flash-attn` even with SDPA elsewhere. V2q
+    # requires `uv pip install flash-attn` even with SDPA elsewhere. V2q
     # crashed here. Set false for the no-flash-attn smoke; ~1.3-1.8×
     # slower fwd. Friends on H100/H200 install flash_attn and flip
     # this back on for the speedup.
@@ -41,7 +41,7 @@ actor_rollout_ref:
     # so the default forces a flash_attn install. Probe `dump_attn_config.py`
     # confirms this is the only knob. Force PyTorch SDPA so the smoke runs in
     # a venv without flash_attn. ~10-15% slower than FA2 on long ctx; friends
-    # on H100s should drop the override and `pip install flash-attn`.
+    # on H100s should drop the override and `uv pip install flash-attn`.
     override_config:
       attn_implementation: sdpa
 

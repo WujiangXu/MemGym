@@ -14,9 +14,10 @@ def test_no_sys_path_hacks():
 
     Exceptions: amem (vendored), webarena_infinity (third-party, installed by
     gym/webarena/install.py), tau2_bench (third-party, installed by
-    gym/tau2_bench/install.py).
+    gym/tau2_bench/install.py), lightmem (third-party adapter under
+    third_party/LightMem; loaded lazily by the lightmem memory method).
     """
-    EXCEPTIONS = {"amem", "webarena_infinity", "tau2_bench"}
+    EXCEPTIONS = {"amem", "webarena_infinity", "tau2_bench", "lightmem"}
 
     violations = []
     for py_file in MEMGYM_SRC.rglob("*.py"):

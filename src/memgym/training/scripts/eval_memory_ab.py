@@ -1,4 +1,4 @@
-"""(see paper) memory A/B smoke: memory-OFF vs memory-ON + gate.
+"""Memory A/B smoke: memory-OFF vs memory-ON + gate.
 
 Runs each coding-env instance (SWE-Smith / SWE-Gym / SWE-Bench) twice
 with the **same frozen** agent LLM:
@@ -9,7 +9,7 @@ with the **same frozen** agent LLM:
   * Arm B  memory-ON : `NaiveSummarizationMemory` + `WorldModelGate`
                        at t*=0.78 (the class-weighted CE checkpoint champion contract).
 
-The research claim this harness tests is the (see paper) thesis: a
+The research claim this harness tests is the MemGym thesis: a
 frozen, strong reasoning model **with** the MemGym memory module
 beats the **same frozen model without memory**. If the claim holds
 we ship the memory contribution; no RL / no summarizer-training is
@@ -110,8 +110,8 @@ def _build_memory_model(args: argparse.Namespace):
       `llm` (OpenHands rolling-summary default), `sliding` (fixed window +
       incremental rolling summary).
     * `--summarizer-backend` is only meaningful for `naive`, which accepts a
-      pluggable `SummarizerBackend`: `litellm` (legacy (see paper)/G.2b path),
-      `local-hf` ((see paper) SFT smoke-eval), `llmlingua2` (H.4' literature
+      pluggable `SummarizerBackend`: `litellm` (default API path),
+      `local-hf` (loads an SFT checkpoint directly), `llmlingua2` (literature
       baseline — token pruning, not generative).
 
     The non-naive strategies call `litellm.completion` internally; they do NOT
@@ -488,7 +488,7 @@ def _summarize(
     tok_b_eff = _effective_token_summary(arm_b)
     tok_c_eff = _effective_token_summary(arm_c)
 
-    # Ship criteria for the memory A/B ablation ((see paper) § Staged rollout).
+    # Ship criteria for the memory A/B ablation.
     # Either a meaningful resolve-rate lift, or matched rate at lower token
     # cost, counts as validation. "Token cost" = what the LLM consumes
     # (effective / post-filter), not what the memory module received.
@@ -728,7 +728,7 @@ def main() -> int:
     parser.add_argument("--dataset", default=DEFAULT_DATASET)
     parser.add_argument("--split", default="train")
     parser.add_argument("--agent-llm", default=DEFAULT_AGENT_LLM,
-                        help="LLM used for BOTH arms. (see paper) assumes a self-hosted vLLM "
+                        help="LLM used for BOTH arms. Defaults assume a self-hosted vLLM "
                              "endpoint; set --agent-llm openai/<served-name> and export "
                              "OPENAI_API_BASE=http://<host>:8000/v1 (dummy OPENAI_API_KEY ok).")
     parser.add_argument("--summarization-model", default=None,
@@ -741,15 +741,15 @@ def main() -> int:
                         choices=["litellm", "local-hf", "llmlingua2"],
                         default="litellm",
                         help="Which SummarizerBackend to plug into NaiveSummarizationMemory. "
-                             "'litellm' (default) matches (see paper)/G.2b behavior. "
-                             "'local-hf' loads the (see paper) SFT checkpoint directly "
+                             "'litellm' (default) routes through the litellm API. "
+                             "'local-hf' loads an SFT checkpoint directly "
                              "via transformers. 'llmlingua2' is the H.4' literature "
                              "baseline: token-pruning via llmlingua.PromptCompressor. "
                              "Only meaningful when --memory-strategy=naive.")
     parser.add_argument("--memory-strategy",
                         choices=["naive", "structured", "llm", "sliding"],
                         default="naive",
-                        help="Compaction algorithm. 'naive' (default) is the (see paper)/H "
+                        help="Compaction algorithm. 'naive' (default) is the standard "
                              "path: threshold-triggered full re-summarize, accepts any "
                              "--summarizer-backend. 'structured' is OpenHands' 17-field "
                              "StateSummary via function calling (H.4' baseline row). "
@@ -840,7 +840,7 @@ def main() -> int:
                              "segment between the last '.' and '__<hash>' in each "
                              "instance_id; prefix-matched so 'func_basic' also captures "
                              "'func_basic_modify' etc. Applied BEFORE --diverse-by-repo "
-                             "or --slice sampling. Used by (see paper) to restrict the "
+                             "or --slice sampling. Used to restrict the "
                              "capability-floor run to easy single-function bugs.")
     args = parser.parse_args()
 

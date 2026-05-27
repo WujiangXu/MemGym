@@ -1,4 +1,4 @@
-"""(see paper) RL training loop for the 8B memory summarizer.
+"""RL training loop for the 8B memory summarizer.
 
 `env_reward` wraps `SWEMemoryEnv.run_episode()` with a recording
 summarizer backend so each rollout yields the exact

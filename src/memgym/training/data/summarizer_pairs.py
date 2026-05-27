@@ -1,4 +1,4 @@
-"""SAFE-filtered summarizer training pairs for (see paper) SFT.
+"""SAFE-filtered summarizer training pairs for the summarizer SFT.
 
 Emits `(prompt, completion)` rows where:
 
