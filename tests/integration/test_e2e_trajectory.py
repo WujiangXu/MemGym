@@ -171,7 +171,7 @@ class TestE2EObservationMasking(unittest.TestCase):
 class TestE2ENaive(unittest.TestCase):
     """E2E test: record → save → reload → replay with NaiveSummarizationMemory."""
 
-    @patch("memgym.memory.strategies.naive_summarization.completion")
+    @patch("memgym.memory.backends.summarizer_backend.completion")
     def test_e2e_record_save_reload_replay_naive(self, mock_completion):
         mock_response = MagicMock()
         mock_response.choices = [MagicMock()]
@@ -213,7 +213,7 @@ class TestE2ENaive(unittest.TestCase):
 class TestE2ECrossStrategyReplay(unittest.TestCase):
     """Record with one strategy, replay through multiple different strategies."""
 
-    @patch("memgym.memory.strategies.naive_summarization.completion")
+    @patch("memgym.memory.backends.summarizer_backend.completion")
     def test_e2e_cross_strategy_replay(self, mock_completion):
         mock_response = MagicMock()
         mock_response.choices = [MagicMock()]

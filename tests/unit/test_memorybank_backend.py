@@ -35,6 +35,7 @@ def _install_fake_sentence_transformers(monkey: dict, embeddings=None):
     class FakeEncoder:
         def __init__(self, model_name):
             self.model_name = model_name
+            self._cursor = 0
 
         def encode(self, texts, normalize_embeddings=False):
             n = len(texts)
@@ -44,7 +45,13 @@ def _install_fake_sentence_transformers(monkey: dict, embeddings=None):
                 for i in range(n):
                     arr[i, i % 4] = 1.0
                 return arr
-            arr = np.asarray(embeddings[:n], dtype=np.float32)
+            # Advance a cursor so each call consumes the *next* `n` rows,
+            # honoring the docstring's "returns the next batch each call".
+            # Without this, every doc + the query got `embeddings[0]`, tying
+            # all cosines and breaking the ranking assertions.
+            start = self._cursor
+            arr = np.asarray(embeddings[start:start + n], dtype=np.float32)
+            self._cursor += n
             return arr
 
     fake_module.SentenceTransformer = FakeEncoder

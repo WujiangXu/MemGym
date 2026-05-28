@@ -10,6 +10,28 @@ import sys
 import unittest
 from unittest.mock import MagicMock, patch, call
 
+import pytest
+
+
+def _load_analyze_replay():
+    """Load ``analyze_replay`` from ``examples/swe_bench/replay.py``.
+
+    The replay tooling moved out of the package and into ``examples/`` during
+    the reorg, so it is no longer importable as ``replay_swe_bench``. It pulls
+    in ``memgym.gym.swe_bench.evaluate``, which imports ``datasets``; skip when
+    that optional (``eval``-extra) dependency is absent.
+    """
+    pytest.importorskip("datasets")
+    import importlib.util
+    from pathlib import Path
+
+    replay_path = Path(__file__).resolve().parents[2] / "examples" / "swe_bench" / "replay.py"
+    spec = importlib.util.spec_from_file_location("memgym_examples_swe_bench_replay", replay_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.analyze_replay
+
+
 def _msg(role, content):
     """Helper to create a message dict."""
     return {"role": role, "content": content}
@@ -48,7 +70,7 @@ def _simulate_agent_steps(memory, n_steps):
 class TestNaiveNoDuplication(unittest.TestCase):
     """Bug 1: _observations accumulation causes duplication with original_context."""
 
-    @patch("memgym.memory.strategies.naive_summarization.completion")
+    @patch("memgym.memory.backends.summarizer_backend.completion")
     def test_naive_no_observation_duplication(self, mock_completion):
         """Content returned by manage_context must not contain duplicate messages."""
         mock_response = MagicMock()
@@ -71,7 +93,7 @@ class TestNaiveNoDuplication(unittest.TestCase):
                     f"Step {i+1}: Duplicate message found: role={msg_key[0]}, content={msg_key[1][:50]}...")
                 seen.append(msg_key)
 
-    @patch("memgym.memory.strategies.naive_summarization.completion")
+    @patch("memgym.memory.backends.summarizer_backend.completion")
     def test_naive_multi_step_no_token_inflation(self, mock_completion):
         """Token count must grow linearly with messages, not quadratically."""
         mock_response = MagicMock()
@@ -100,7 +122,7 @@ class TestNaiveNoDuplication(unittest.TestCase):
 class TestNaiveCompressionRatio(unittest.TestCase):
     """Bug 2: Missing compression_ratio in naive metadata."""
 
-    @patch("memgym.memory.strategies.naive_summarization.completion")
+    @patch("memgym.memory.backends.summarizer_backend.completion")
     def test_naive_compression_ratio_in_metadata(self, mock_completion):
         """compression_ratio must exist and be > 1.0 when compacted with enough messages."""
         mock_response = MagicMock()
@@ -135,7 +157,7 @@ class TestNaiveCompressionRatio(unittest.TestCase):
 class TestNaiveKeepsRecent(unittest.TestCase):
     """Bug 3: Over-aggressive output — only 2 messages after summarization."""
 
-    @patch("memgym.memory.strategies.naive_summarization.completion")
+    @patch("memgym.memory.backends.summarizer_backend.completion")
     def test_naive_keeps_recent_after_summary(self, mock_completion):
         """After summarization, output must have more than 2 messages (summary + tail)."""
         mock_response = MagicMock()
@@ -187,7 +209,7 @@ class TestAllStrategiesConsistentMetadata(unittest.TestCase):
     REQUIRED_KEYS = {"tokens", "original_tokens", "was_compacted",
                      "compression_ratio", "direct_messages", "strategy"}
 
-    @patch("memgym.memory.strategies.naive_summarization.completion")
+    @patch("memgym.memory.backends.summarizer_backend.completion")
     def test_all_strategies_consistent_metadata(self, mock_completion):
         """Every strategy must include all required metadata keys."""
         mock_response = MagicMock()
@@ -222,7 +244,9 @@ class TestFinalStepObservation(unittest.TestCase):
         from memgym.memory.base import PassThroughMemory
 
         # We need to mock the agent to test get_training_trajectory()
-        # Import the real class
+        # Import the real class (subclasses minisweagent's DefaultAgent, an
+        # optional `swe`-extra dependency not installed in the unit-CI env).
+        pytest.importorskip("minisweagent")
         from memgym.gym.swe_bench.agent import MemoryAwareSWEAgent
 
         mock_model = MagicMock()
@@ -293,7 +317,7 @@ class TestFinalStepObservation(unittest.TestCase):
 class TestNaiveSummarizationContent(unittest.TestCase):
     """Bug 1 (continued): Content sent to LLM for summarization must not be duplicated."""
 
-    @patch("memgym.memory.strategies.naive_summarization.completion")
+    @patch("memgym.memory.backends.summarizer_backend.completion")
     def test_naive_summarization_content_not_duplicated(self, mock_completion):
         """The content sent to LLM for summarization must not duplicate messages."""
         mock_response = MagicMock()
@@ -368,8 +392,8 @@ class TestReplayAnalysisMetadataMatch(unittest.TestCase):
                 "compression_ratio": result.metadata.get("compression_ratio", 1.0),
             })
 
-        # Replay: use analyze_replay
-        from replay_swe_bench import analyze_replay
+        # Replay: use analyze_replay (loaded from the relocated example script).
+        analyze_replay = _load_analyze_replay()
         replay_data = {"messages": messages, "steps": steps, "instance_id": "test", "memory_strategy": "test"}
         replay_memory = ObservationMaskingMemory(attention_window=3, keep_first=1)
         analysis = analyze_replay(replay_data, replay_memory)

@@ -1,10 +1,5 @@
-import os
-import sys
-import types
 import unittest
 from unittest.mock import MagicMock, patch
-
-sys.modules.setdefault("litellm", types.SimpleNamespace(completion=None))
 
 from memgym.memory.strategies.adaptive_token_budget import AdaptiveTokenBudgetMemory
 

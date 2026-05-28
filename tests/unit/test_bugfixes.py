@@ -9,6 +9,8 @@ import sys
 import os
 import copy
 
+import pytest
+
 # Add src to path
 
 # ============================================================================
@@ -141,6 +143,8 @@ class TestCompressionRatioTokens:
     def test_wrapper_calls_count_tokens_not_len(self):
         """Verify the source code uses count_tokens(), not len(str(...))."""
         import inspect
+
+        pytest.importorskip("minisweagent")
         from memgym.gym.swe_bench.agent import MemoryAwareSWEAgent
 
         source = inspect.getsource(MemoryAwareSWEAgent.query)

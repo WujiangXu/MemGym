@@ -97,6 +97,12 @@ dev = [
     "pytest-cov>=4.0.0",
     "black>=23.0.0",
     "ruff>=0.1.0",
+    # Runtime deps of the coding_synthetic (MemGymCodeQA) pipeline, pulled in
+    # transitively when CI collects tests/unit/test_{diff_parser,extract,schemas}.py.
+    # Kept here (rather than installing the much heavier `swe` extra in CI) so the
+    # unit suite can import the pipeline's diff parser + LLM client.
+    "unidiff",
+    "tenacity>=9.0.0",
 ]
 
 # Training stack — versions floor at torch 2.4+, transformers 4.44+,

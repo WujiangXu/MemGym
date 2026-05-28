@@ -25,14 +25,39 @@ import unittest
 from unittest.mock import MagicMock
 
 
-def _install_fake_simplemem(monkey: dict, retrieved_entries=None):
-    """Stub the `simplemem` and `simplemem.config` modules.
+_FAKE_SIMPLEMEM_MODULES = (
+    "simplemem",
+    "simplemem.config",
+    "simplemem.core",
+    "simplemem.core.memory_builder",
+)
 
-    `SimpleMemBackend._create_system()` imports both — we need to provide
-    a `SimpleMemSystem` factory and a `get_config`/`set_config` pair.
+
+def _install_fake_simplemem(monkey: dict, retrieved_entries=None):
+    """Stub the `simplemem`, `simplemem.config`, and `simplemem.core` modules.
+
+    `SimpleMemBackend._create_system()` imports `simplemem` + `simplemem.config`
+    (for `SimpleMemSystem` and the `get_config`/`set_config` pair) and, via
+    `_install_neutral_extraction_prompt()`, also does
+    `from simplemem.core.memory_builder import MemoryBuilder` to monkey-patch
+    its `_build_extraction_prompt`. We register all four so that import resolves
+    against the stub instead of aborting the test.
     """
     fake_module = types.ModuleType("simplemem")
     fake_config = types.ModuleType("simplemem.config")
+    fake_core = types.ModuleType("simplemem.core")
+    fake_core.__path__ = []  # mark as a package so dotted import resolves
+    fake_memory_builder = types.ModuleType("simplemem.core.memory_builder")
+
+    class MemoryBuilder:
+        """Stub target; only `_build_extraction_prompt` is reassigned."""
+
+        def _build_extraction_prompt(self, *args, **kwargs):
+            return ""
+
+    fake_memory_builder.MemoryBuilder = MemoryBuilder
+    fake_core.memory_builder = fake_memory_builder
+    fake_module.core = fake_core
 
     fake_instance = MagicMock(name="SimpleMemSystemInstance")
     retriever = MagicMock(name="HybridRetriever")
@@ -58,15 +83,17 @@ def _install_fake_simplemem(monkey: dict, retrieved_entries=None):
     fake_config.get_config = MagicMock(return_value=cfg)
     fake_config.set_config = MagicMock()
 
-    monkey["simplemem"] = sys.modules.get("simplemem")
-    monkey["simplemem.config"] = sys.modules.get("simplemem.config")
+    for name in _FAKE_SIMPLEMEM_MODULES:
+        monkey[name] = sys.modules.get(name)
     sys.modules["simplemem"] = fake_module
     sys.modules["simplemem.config"] = fake_config
+    sys.modules["simplemem.core"] = fake_core
+    sys.modules["simplemem.core.memory_builder"] = fake_memory_builder
     return fake_module.SimpleMemSystem, fake_instance
 
 
 def _restore_fake_simplemem(monkey: dict):
-    for name in ("simplemem", "simplemem.config"):
+    for name in _FAKE_SIMPLEMEM_MODULES:
         prior = monkey.get(name)
         if prior is None:
             sys.modules.pop(name, None)
