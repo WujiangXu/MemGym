@@ -3,6 +3,13 @@
 
 # MemGym
 
+[![CI](https://github.com/WujiangXu/MemGym/actions/workflows/ci.yml/badge.svg)](https://github.com/WujiangXu/MemGym/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-%E2%89%A53.10-blue.svg)](https://www.python.org/downloads/)
+[![arXiv](https://img.shields.io/badge/arXiv-2605.20833-b31b1b.svg)](https://arxiv.org/abs/2605.20833)
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-green.svg)](LICENSE)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Lint: ruff](https://img.shields.io/badge/lint-ruff-%23261230.svg)](https://github.com/astral-sh/ruff)
+
 *A gym for testing — and training — memory in long-context LLM agents.*
 
 As an agent's trajectory grows, its context window fills up and performance
@@ -10,6 +17,11 @@ degrades. MemGym makes the *memory* of an agent a first-class, swappable
 component: implement one interface, register it by name, and drop it into five
 agent tracks behind the same loop — then score it with standardized evals and a
 trained Memory Reward Model.
+
+<p align="center">
+  <img src="assets/framework.png" width="100%"
+       alt="MemGym framework: five agent tracks share one loop in which a pluggable memory manager filters each observation before the agent acts; the resulting trajectories are scored by standardized evals and a trained Memory Reward Model.">
+</p>
 
 ## Memory–Reasoning Separation
 

@@ -2,6 +2,12 @@
 
 Static images referenced by the top-level `README.md`.
 
+## Framework figure
+
+`framework.png` is the architecture overview embedded near the top of
+`README.md` (the paper's framework diagram). It is a detailed, full-width
+landscape figure, so it is allowed to exceed the small-image budget below.
+
 ## Banner slot
 
 `README.md` reserves a hero-banner slot at the very top, commented out:
