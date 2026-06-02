@@ -6,6 +6,7 @@
 [![CI](https://github.com/WujiangXu/MemGym/actions/workflows/ci.yml/badge.svg)](https://github.com/WujiangXu/MemGym/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-%E2%89%A53.10-blue.svg)](https://www.python.org/downloads/)
 [![arXiv](https://img.shields.io/badge/arXiv-2605.20833-b31b1b.svg)](https://arxiv.org/abs/2605.20833)
+[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-MemGym-FFD21E.svg)](https://huggingface.co/MemGym)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-green.svg)](LICENSE)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Lint: ruff](https://img.shields.io/badge/lint-ruff-%23261230.svg)](https://github.com/astral-sh/ruff)
