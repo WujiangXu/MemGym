@@ -7,8 +7,8 @@ This module provides the MemGym-compatible interface for the A-mem
 
 from typing import Any, Dict, List, Optional
 
-# Package-relative import; avoids triggering memgym/memory/__init__.py side
-# effects (which would re-import this module mid-load — circular). The
+# Package-relative import: pull in the already-loaded `memgym.memory.base`
+# submodule directly, instead of the old sys.path hack. The
 # previous bare `from base import ...` only worked in dev because another
 # module had already injected src/memgym/memory/ into sys.path; in a clean
 # `pip install -e .[memory-eval]` venv it failed with "No module named 'base'".
