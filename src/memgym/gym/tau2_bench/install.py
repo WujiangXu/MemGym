@@ -104,6 +104,18 @@ def main() -> None:
     tau2_parent.mkdir(parents=True, exist_ok=True)
     if tau2_dir.exists() and (tau2_dir / ".git").exists():
         print(f"\n=== tau2-bench already cloned at {tau2_dir}, skipping clone ===")
+        # Re-pin existing checkouts too, so reruns are actually reproducible
+        # (a clone left at a different/old SHA would otherwise stay there).
+        # check=False: a shallow/old clone may not have the SHA, or the tree
+        # may be dirty — warn instead of crashing.
+        print(f"=== Ensuring pinned SHA {TAU2_REPO_SHA} is checked out ===")
+        rc = _run(["git", "checkout", TAU2_REPO_SHA], cwd=tau2_dir, check=False)
+        if rc != 0:
+            print(
+                f"WARNING: could not check out {TAU2_REPO_SHA} in existing "
+                f"{tau2_dir} (uncommitted changes, or a shallow clone missing "
+                f"the commit?). Leaving the current checkout as-is."
+            )
     elif tau2_dir.exists():
         raise SystemExit(
             f"{tau2_dir} exists but is not a git checkout — please remove it manually"

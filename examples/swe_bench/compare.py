@@ -7,7 +7,10 @@ a comparison table with resolve rates, compression ratios, and costs.
 
 Usage:
     python examples/swe_bench/compare.py results/comparison_20250204_120000
-    python examples/swe_bench/compare.py results/comparison_*  # latest
+
+Takes exactly one results directory (one subdir per strategy). To pick the
+latest run, expand the glob yourself and pass a single path, e.g.:
+    python examples/swe_bench/compare.py "$(ls -dt results/comparison_* | head -1)"
 """
 
 import argparse
