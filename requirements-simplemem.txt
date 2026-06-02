@@ -1,0 +1,13 @@
+# SimpleMem (semantic structured compression) runtime deps.
+#
+# Install with: pip install -r requirements-simplemem.txt
+#                 (equivalent: pip install -e ".[simplemem]")
+#
+# Used in:
+#   - MemGym-CodeQA (`memgym.pipelines.coding_synthetic`, --method simplemem)
+#   - MemGym-DR    (`memgym.pipelines.memgym_ir`, --strategies ir_simplemem)
+#
+# SimpleMem pulls lancedb (~80 MB), pyarrow, and tantivy (Rust full-text
+# search). Co-installable with A-MEM, Mem0, and HippoRAG.
+
+simplemem
