@@ -8,6 +8,7 @@ import subprocess
 import json
 import tempfile
 import os
+import warnings
 from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass
 
@@ -674,9 +675,13 @@ class SWEMemoryEnv(BaseMemoryEnvironment):
                 with open(config_path) as f:
                     config_data = yaml.safe_load(f)
                 return config_data.get("environment", {})
-        print("WARNING: swebench.yaml not found in benchmarks/ or extra/. "
-              "Using empty environment config. Install mini-swe-agent v2.2+ "
-              "or check your minisweagent installation.")
+        warnings.warn(
+            "swebench.yaml not found in benchmarks/ or extra/. "
+            "Using empty environment config. Install mini-swe-agent v2.2+ "
+            "or check your minisweagent installation.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
         return {}
 
     def _create_environment(self, verbose: bool = False):
@@ -1112,9 +1117,13 @@ class SWEMemoryEnv(BaseMemoryEnvironment):
                     with open(config_path) as f:
                         config_data = yaml.safe_load(f)
                     return config_data.get("model", {})
-        print("WARNING: swebench.yaml not found in benchmarks/ or extra/. "
-              "Using empty model config. This may cause tool-call parsing "
-              "issues (text-based prompts vs function-calling).")
+        warnings.warn(
+            "swebench.yaml not found in benchmarks/ or extra/. "
+            "Using empty model config. This may cause tool-call parsing "
+            "issues (text-based prompts vs function-calling).",
+            RuntimeWarning,
+            stacklevel=2,
+        )
         return {}
 
     def _get_mini_swe_config(self) -> Dict[str, Any]:
@@ -1145,10 +1154,14 @@ class SWEMemoryEnv(BaseMemoryEnvironment):
                     break
         if config_path is None:
             config_path = get_config_path("default.yaml")
-            print("WARNING: swebench.yaml not found in benchmarks/ or extra/. "
-                  "Falling back to default.yaml which uses text-based prompts "
-                  "incompatible with LitellmModel's function-calling format. "
-                  "This will cause 'No tool calls found' errors.")
+            warnings.warn(
+                "swebench.yaml not found in benchmarks/ or extra/. "
+                "Falling back to default.yaml which uses text-based prompts "
+                "incompatible with LitellmModel's function-calling format. "
+                "This will cause 'No tool calls found' errors.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
 
         with open(config_path) as f:
             config_data = yaml.safe_load(f)
