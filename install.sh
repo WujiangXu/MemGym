@@ -231,8 +231,8 @@ fi
 # clone is missing, the install is INCOMPLETE — fail loudly so CI catches it.
 if [ ${#MISSING_CLONES[@]} -ne 0 ]; then
     echo -e "\n${RED}=================================="
-    echo "✗ Installation INCOMPLETE"
-    echo "==================================${NC}"
+    echo -e "✗ Installation INCOMPLETE"
+    echo -e "==================================${NC}"
     echo -e "${RED}Missing third-party clones: ${MISSING_CLONES[*]}${NC}"
     echo "See the clone commands printed above. install.sh does NOT clone"
     echo "third-party repos for you — pre-clone them under third_party/ first."
