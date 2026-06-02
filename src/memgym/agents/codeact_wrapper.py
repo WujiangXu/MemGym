@@ -62,12 +62,20 @@ except (ImportError, AttributeError) as _e:
 
 
 def check_openhands_available():
-    """Raise ImportError if OpenHands is not installed."""
+    """Raise ImportError if the OpenHands CodeAct wrapper can't be used.
+
+    Surfaces the captured import cause (`_OPENHANDS_IMPORT_ERROR`) so that an
+    *installed-but-incompatible* OpenHands (e.g. ``openhands-ai>=1.7.0``, which
+    imports at top level but lacks the legacy ``openhands.core``/``events``
+    layout this wrapper targets) is reported as such — instead of falsely
+    telling the user OpenHands is "not installed" and to re-install it.
+    """
     if not _OPENHANDS_AVAILABLE:
         raise ImportError(
-            "OpenHands not installed. Run: ./install.sh --openhands\n"
-            "Or: git submodule update --init third_party/OpenHands && "
-            "pip install -e third_party/OpenHands"
+            (_OPENHANDS_IMPORT_ERROR or "OpenHands import failed.")
+            + "\nIf OpenHands is not installed at all, run: ./install.sh "
+            "--openhands (or: git submodule update --init third_party/OpenHands "
+            "&& pip install -e third_party/OpenHands)."
         )
 
 

@@ -218,12 +218,22 @@ fi
 if [ "$INSTALL_OPENHANDS" = true ] && [ -d "third_party/OpenHands" ]; then
     "$VENV_PY" -c "
 import sys
+sys.path.insert(0, 'src')
 try:
     import openhands
-    print('✓ OpenHands available')
 except ImportError:
     print('✗ OpenHands not available')
     sys.exit(1)
+# Top-level 'import openhands' succeeding is NOT enough: openhands-ai>=1.7.0
+# imports but drops the legacy openhands.core/events API the MemGym CodeAct
+# wrapper needs. Verify the wrapper itself so the footer is honest.
+from memgym.agents.codeact_wrapper import _OPENHANDS_AVAILABLE, _OPENHANDS_IMPORT_ERROR
+if _OPENHANDS_AVAILABLE:
+    print('✓ OpenHands available (CodeAct wrapper ready)')
+else:
+    print('⚠ OpenHands installed but the MemGym CodeAct wrapper is incompatible:')
+    print('  ' + (_OPENHANDS_IMPORT_ERROR or 'unknown import error'))
+    print('  --agent codeact is disabled; other tracks are unaffected.')
 "
 fi
 
