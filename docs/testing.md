@@ -43,17 +43,21 @@ pytest tests/unit/test_imports.py            # expect: 4 passed
 pytest tests/unit/test_imports.py tests/unit/test_rm_eval.py \
        tests/unit/test_world_model.py tests/unit/test_memory_strategies_roundtrip.py \
        tests/unit/test_known_bugs.py tests/unit/test_memory_eval.py -q
-# expect: 66 passed, 1 xfailed
+# expect: 67 passed
 ```
 
-> The single `xfail` is a documented open contract bug (config fallback uses
-> `print()` instead of `warnings.warn` in `gym/swe_bench/env.py`). It is expected.
+> There are no `xfail`s: the config-fallback contract bug (`gym/swe_bench/env.py`
+> used `print()` instead of `warnings.warn`) is now fixed, so its `xfail` marker
+> was removed.
 
-The full `tests/unit/` run on `[dev,eval]` reports
-**286 passed, 15 skipped, 1 xfailed**. The 15 skips are tau2 trajectory-loader
-tests that need a captured-episode fixture (regenerate locally per the
-docstring at `tests/unit/test_tau2_trajectory_loader.py`); the rest of the
-suite is green without extras beyond `[dev,eval]`.
+With all track extras installed, the full `tests/unit/` run reports
+**301 passed, 1 skipped, 0 xfailed** (302 collected). The lone skip is the
+API-key-gated integration test in `test_naive_summarization.py` (set
+`OPENAI_API_KEY` and `RUN_INTEGRATION_TESTS=1` to include it). On `[dev,eval]`
+alone, the `[swe]`-only tests (`minisweagent`/`unidiff`, etc.) self-skip via
+`pytest.importorskip`; the tau2 trajectory-loader tests run against the
+committed fixture at `tests/fixtures/trajectories/tau2_bench_run/` and self-skip
+only if it is removed.
 
 ---
 

@@ -6,11 +6,12 @@ cross-side contract between runner and world-memory trainer: event counts
 and msg_index roles must round-trip exactly, or the downstream training
 dataset silently mislabels examples.
 
-When the fixture tree is absent (fresh clones don't ship the ~MB of
-captured-episode JSON), the suite skips cleanly rather than failing —
-contributors without a tau2 capture can still run `pytest tests/unit`.
-To regenerate the fixture locally, run a `Tau2BenchRunner` retail-task-0
-episode with `memory_side=both, max_steps=10, kf=1, kl=2, r=0.6`,
+The captured-episode fixture is committed under
+`tests/fixtures/trajectories/tau2_bench_run/`, so these tests run by default.
+The module-level `skipif` is a safety net: if that fixture is ever removed (or
+while regenerating it), the suite skips cleanly instead of failing, so
+`pytest tests/unit` stays green. To regenerate, run a `Tau2BenchRunner`
+retail-task-0 episode with `memory_side=both, max_steps=10, kf=1, kl=2, r=0.6`,
 strategy=tau2_summarizing, and copy the run dir under
 `tests/fixtures/trajectories/tau2_bench_run/memory/retail/0/`.
 """
@@ -40,9 +41,9 @@ RETAIL_TASK_DIR = FIXTURE_ROOT / "memory" / "retail" / "0"
 pytestmark = pytest.mark.skipif(
     not (RETAIL_TASK_DIR / "result.json").exists(),
     reason=(
-        "tau2 captured-episode fixture is not committed (~MB of JSON). "
-        "Regenerate with `Tau2BenchRunner` retail task 0; see module "
-        "docstring for parameters."
+        "tau2 captured-episode fixture missing (it is normally committed; "
+        "this only trips if it was removed or is being regenerated). "
+        "Regenerate with `Tau2BenchRunner` retail task 0; see module docstring."
     ),
 )
 
