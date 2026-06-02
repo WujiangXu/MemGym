@@ -74,13 +74,42 @@ load snippets: [`docs/data.md`](docs/data.md).
 ```bash
 pip install uv                 # one-time; every `pip` below can then be `uv pip`
 
-./install.sh --all             # core + SWE-bench + tau2 + OpenHands
 ./install.sh --swe             # SWE-bench only (mini-swe-agent scaffold)
-# or, directly:  uv pip install -e ".[swe]"   # extras: swe, tau2, eval, train, dev
+./install.sh --all             # core + SWE-bench requirements (does NOT auto-clone
+                               #   tau2-bench / OpenHands — pre-clone them under
+                               #   third_party/ first; the script prints the
+                               #   exact commands and exits non-zero if missing)
+# or, directly:  uv pip install -e ".[swe]"   # extras: swe, tau2, eval, train, dev,
+                                              # amem, simplemem, mem0, hipporag,
+                                              # memory-eval, webarena, lightmem
 ```
 
 **Requirements:** Python 3.12+, Docker (for SWE-bench eval), `swebench>=4.1.0`.
-See [`docs/quickstart.md`](docs/quickstart.md) for backend setup and first runs.
+See [`docs/quickstart.md`](docs/quickstart.md) for backend setup and first runs,
+and [`docs/backends.md`](docs/backends.md) for LLM-provider env wiring.
+
+### Backend × scenario × install
+
+Every scenario accepts the universal baselines (`none`, `passthrough`,
+`summary`, `structured`). The column below lists only the **scenario-specific**
+memory backends.
+
+| Scenario | Specific backends | Install |
+|---|---|---|
+| **CodeQA** (`memgym.pipelines.coding_synthetic`) | `amem`, `hipporag`, `simplemem`, `mem0`, `memorybank` | `pip install -e .[memory-eval]` |
+| **DeepResearch** (`memgym.pipelines.memgym_ir`) | `ir_bm25`, `ir_naive_rag`, `ir_amem`, `ir_hipporag`, `ir_simplemem`, `ir_mem0`, `ir_memorybank`, `ir_lightmem`¹ | `pip install -e .[memory-eval]` |
+| **SWE-Gym** (`gym/swe_bench`) | `swe-amem` | `pip install -e .[swe,amem]` |
+| **τ²-bench** (`gym/tau2_bench`) | `tau2_summarizing` | `pip install -e .[tau2]` |
+| **WebArena** (`gym/webarena`) | (baselines only) | `pip install -e .[webarena]` |
+
+¹ `ir_lightmem` needs a sidecar venv (upstream pins Python `>=3.10,<3.12`);
+see the `[lightmem]` notes in `pyproject.toml`.
+
+`[memory-eval]` pulls A-MEM + SimpleMem + Mem0 (co-installable). `[hipporag]`
+is **opt-in separate** — HippoRAG 2.0.0a4 hard-pins
+`litellm==1.73.1`/`vllm==0.6.6.post1`, which is **incompatible** with
+`[tau2]`/`[openhands]`/`[rl-way-a]` in the same venv. Install HippoRAG in
+its own venv if you need both.
 
 ## Quickstart
 
