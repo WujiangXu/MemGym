@@ -65,3 +65,7 @@ third_party/llmlingua-2/
 # and LightMem (now the `lightmem` pip extra — pip install 'memgym[lightmem]').
 third_party/SWE-Bench-Fork/
 third_party/LightMem/
+third_party/webarena-infinity/
+
+# Reproduction smoke-run outputs (audit-only, not paper artifacts)
+data/dr_smoke*/
