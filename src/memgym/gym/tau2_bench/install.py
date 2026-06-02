@@ -4,11 +4,13 @@ verify the MemGym integration.
 
 Usage (locally, or submitted to a remote runner via POST /run-script):
     python -m memgym.gym.tau2_bench.install
+    python -m memgym.gym.tau2_bench.install --help
 
 What this script does
 =====================
 1. Clones ``sierra-research/tau2-bench`` into
    ``<repo_root>/third_party/tau2-bench/`` (skips if already present).
+   Pins to ``TAU2_REPO_SHA`` so reruns are reproducible.
 2. Runs ``pip install -e third_party/tau2-bench`` into the current venv
    so ``import tau2`` works without the sys.path fallback baked into
    ``memgym.gym.tau2_bench.env._ensure_tau2_on_path``.
@@ -36,11 +38,17 @@ when a bare ``git clone`` exists without pip install.
 """
 from __future__ import annotations
 
+import argparse
 import subprocess
 import sys
 from pathlib import Path
 
 TAU2_REPO = "https://github.com/sierra-research/tau2-bench.git"
+# Pinned SHA — matches the version `requirements-tau2.txt` claims it
+# tracks. Bump together with that file. `git clone --depth 1` cannot
+# fetch a specific SHA directly, so we clone the default branch and
+# `git checkout` to this commit.
+TAU2_REPO_SHA = "fcc9ed6"
 
 
 def _repo_root() -> Path:
@@ -62,6 +70,24 @@ def _run(cmd: list[str], *, check: bool = True, cwd: Path | None = None) -> int:
 
 
 def main() -> None:
+    # Argparse here is purely for `--help`. The script has no required
+    # args and historically always ran on `python -m ...install` — but
+    # without argparse, `... .install --help` would eagerly clone +
+    # pip-install, which is a nasty surprise on first contact.
+    parser = argparse.ArgumentParser(
+        description=(
+            f"Clone sierra-research/tau2-bench (pinned to {TAU2_REPO_SHA}) "
+            f"into third_party/tau2-bench, pip install -e it, and verify the "
+            f"MemGym integration. Idempotent on re-run."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(
+        "--venv", type=str, default=None,
+        help="(Informational only; install uses the current sys.executable.)",
+    )
+    parser.parse_args()
+
     repo_root = _repo_root()
     tau2_parent = repo_root / "third_party"
     tau2_dir = tau2_parent / "tau2-bench"
@@ -72,6 +98,7 @@ def main() -> None:
     print(f"Repo root:        {repo_root}")
     print(f"Venv python:      {python_exe}")
     print(f"Target directory: {tau2_dir}")
+    print(f"Pinned SHA:       {TAU2_REPO_SHA}")
 
     # ---- Step 1: Clone sierra-research/tau2-bench (idempotent) ----
     tau2_parent.mkdir(parents=True, exist_ok=True)
@@ -83,7 +110,9 @@ def main() -> None:
         )
     else:
         print(f"\n=== Cloning {TAU2_REPO} into {tau2_dir} ===")
-        _run(["git", "clone", "--depth", "1", TAU2_REPO, str(tau2_dir)])
+        _run(["git", "clone", TAU2_REPO, str(tau2_dir)])
+        print(f"=== Checking out pinned SHA {TAU2_REPO_SHA} ===")
+        _run(["git", "checkout", TAU2_REPO_SHA], cwd=tau2_dir)
 
     # ---- Step 2: pip install -e the cloned repo ----
     print(f"\n=== Installing tau2-bench into venv: pip install -e {tau2_dir} ===")

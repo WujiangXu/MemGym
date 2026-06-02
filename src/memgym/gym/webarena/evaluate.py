@@ -59,14 +59,18 @@ def config() -> argparse.Namespace:
 
     # Environment
     parser.add_argument(
-        "--webarena_dir", type=str, default="",
+        "--webarena_dir", "--webarena-dir", dest="webarena_dir",
+        type=str, default="",
         help="Path to the webarena-infinity checkout. "
-             "Defaults to src/memgym/envs/webarena_infinity/ inside the repo.",
+             "Defaults to src/memgym/envs/webarena_infinity/ inside the repo. "
+             "(Both --webarena_dir and --webarena-dir are accepted; the "
+             "dataset_stats sibling CLI uses the hyphenated form.)",
     )
     parser.add_argument(
-        "--app_name", type=str, required=True,
+        "--app_name", type=str, default=None,
         help="WebArena app name (e.g. gmail, gitlab, reddit). "
-             "Use --list_apps to enumerate.",
+             "Use --list_apps to enumerate. Required unless --list_apps or "
+             "--list_memory_models is passed.",
     )
     parser.add_argument(
         "--task_ids", type=str, default="",
@@ -104,8 +108,9 @@ def config() -> argparse.Namespace:
         choices=["webarena"],
         help="Agent implementation (only 'webarena' supported in the initial track).",
     )
-    parser.add_argument("--policy_model", type=str, required=True,
-                        help="litellm model id (e.g. 'bedrock/us.anthropic.claude-...').")
+    parser.add_argument("--policy_model", type=str, default=None,
+                        help="litellm model id (e.g. 'bedrock/us.anthropic.claude-...'). "
+                             "Required unless --list_apps or --list_memory_models is passed.")
     parser.add_argument("--policy_max_tokens", type=int, default=256,
                         help="Max tokens per agent response.")
     parser.add_argument("--policy_temperature", type=float, default=0.0)
@@ -545,6 +550,44 @@ def main() -> None:
     _configure_logging(args.log_level)
 
     # ------------------------------------------------------------------
+    # List-only modes short-circuit BEFORE requiring a webarena clone,
+    # an app name, or a policy model. Useful for `--help`-style discovery
+    # from a fresh checkout (previously required dummy --app_name and
+    # --policy_model values to even get to the listing).
+    # ------------------------------------------------------------------
+    if args.list_memory_models:
+        print("Registered memory models:")
+        for n in sorted(list_memory_models()):
+            print(f"  {n}")
+        return
+
+    if args.list_apps:
+        webarena_dir = _resolve_webarena_dir(args.webarena_dir)
+        from .server_pool import WebArenaServerPool
+        pool = WebArenaServerPool(
+            webarena_dir=webarena_dir,
+            port_range=_parse_port_range(args.port_range),
+        )
+        print(f"Available webarena apps under {webarena_dir}:")
+        for name in pool.list_apps():
+            print(f"  {name}")
+        return
+
+    # ------------------------------------------------------------------
+    # Beyond this point we need a real run config.
+    # ------------------------------------------------------------------
+    if args.app_name is None:
+        raise SystemExit(
+            "--app_name is required for a normal run. "
+            "Use --list_apps to enumerate available apps."
+        )
+    if args.policy_model is None:
+        raise SystemExit(
+            "--policy_model is required for a normal run. "
+            "(litellm model id, e.g. 'bedrock/us.anthropic.claude-...')."
+        )
+
+    # ------------------------------------------------------------------
     # Replay mode: offline memory evaluation, no browser/server needed
     # ------------------------------------------------------------------
     if args.replay_from:
@@ -613,23 +656,6 @@ def main() -> None:
     # ------------------------------------------------------------------
     webarena_dir = _resolve_webarena_dir(args.webarena_dir)
     logger.info("using webarena-infinity at %s", webarena_dir)
-
-    if args.list_memory_models:
-        print("Registered memory models:")
-        for n in sorted(list_memory_models()):
-            print(f"  {n}")
-        return
-
-    if args.list_apps:
-        from .server_pool import WebArenaServerPool
-        pool = WebArenaServerPool(
-            webarena_dir=webarena_dir,
-            port_range=_parse_port_range(args.port_range),
-        )
-        print("Available webarena apps:")
-        for name in pool.list_apps():
-            print(f"  {name}")
-        return
 
     # Resolve task ids
     task_ids = enumerate_task_ids(

@@ -22,8 +22,16 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-# OpenHands imports (optional — guarded by try/except at module level)
+# OpenHands imports (optional — guarded by try/except at module level).
+#
+# This wrapper targets the legacy `openhands.core` / `openhands.events`
+# / `openhands.utils` module layout. `openhands-ai>=1.7.0` reorganized
+# those into `openhands.sdk` etc., so the imports below raise
+# AttributeError (not ImportError) on a fresh install. We catch both so
+# `import memgym` + `--agent codeact` produce a clean "disabled" path
+# instead of crashing with a deep AttributeError.
 _OPENHANDS_AVAILABLE = False
+_OPENHANDS_IMPORT_ERROR: Optional[str] = None
 try:
     from openhands.core.config import OpenHandsConfig
     from openhands.core.config.agent_config import AgentConfig
@@ -44,8 +52,13 @@ try:
     from openhands.events.observation.commands import CmdOutputObservation
     from openhands.utils.async_utils import call_async_from_sync
     _OPENHANDS_AVAILABLE = True
-except ImportError:
-    pass
+except (ImportError, AttributeError) as _e:
+    _OPENHANDS_IMPORT_ERROR = (
+        f"{type(_e).__name__}: {_e}. The MemGym CodeAct wrapper targets the "
+        f"legacy `openhands.core`/`openhands.events`/`openhands.utils` API "
+        f"and is incompatible with `openhands-ai>=1.7.0`. To enable CodeAct, "
+        f"install a compatible OpenHands version (or use --agent mini)."
+    )
 
 
 def check_openhands_available():
