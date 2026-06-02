@@ -96,9 +96,10 @@ The registry should include the paper's baselines:
 the optional dependency is installed — see Caveats.
 
 **Caveats for Tier 1:**
-- `webarena --list_apps` / `--list_memory_models` are **not** zero-cost: `main()`
-  resolves the WebArena-Infinity directory before those flags short-circuit, so
-  they need WebArena installed. Only `webarena --help` is a true no-dep smoke.
+- `webarena --list_memory_models` **is** zero-cost: `main()` short-circuits and
+  prints the registry before resolving the WebArena-Infinity directory, so no
+  checkout is needed. `webarena --list_apps`, however, **does** need WebArena
+  installed — it resolves the clone to enumerate apps.
 - `coding_synthetic --help` and `examples/memgym_dr/run_ir_benchmark.py --help` import
   `unidiff` / `tenacity` at module load, so they need the `[swe]` extra even just
   to print help. See Tier 3.
