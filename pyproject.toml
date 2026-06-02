@@ -196,12 +196,16 @@ hipporag = [
     "hipporag>=2.0.0a4",
 ]
 
-# Meta-extra: A-MEM + SimpleMem + Mem0 together. Pulls the three
-# backends that always co-install (no upstream pin conflicts among them).
-# HippoRAG stays opt-in (see warning above) — add `[hipporag]` separately
-# if you need it AND aren't using tau2/openhands/rl-way-a in the same venv.
+# Meta-extra: A-MEM + SimpleMem + Mem0 together, plus the `datasets`
+# library used by both the CodeQA and DR pipelines for HF data loading.
+# Pulls the three backends that always co-install (no upstream pin
+# conflicts among them). HippoRAG stays opt-in (see warning above) —
+# add `[hipporag]` separately if you need it AND aren't using
+# tau2/openhands/rl-way-a in the same venv.
 memory-eval = [
     "memgym[amem,simplemem,mem0]",
+    "datasets",
+    "huggingface-hub>=0.25.0",
 ]
 
 # WebArena (Web GUI) track.
