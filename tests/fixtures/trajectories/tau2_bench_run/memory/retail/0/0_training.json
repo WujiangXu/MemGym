@@ -1,0 +1,176 @@
+{
+  "domain": "retail",
+  "task_id": "0",
+  "memory_strategy_agent": "Tau2SummarizingMemory",
+  "memory_strategy_user": "Tau2SummarizingMemory",
+  "memory_side": "both",
+  "episode_reward": 0.0,
+  "episode_outcome": "unresolved",
+  "condensation_history": {
+    "agent": [],
+    "user": []
+  },
+  "steps": [
+    {
+      "step": 0,
+      "turn_idx": 1,
+      "msg_index": 2,
+      "side": "agent",
+      "memory": {
+        "was_compacted": false,
+        "new_compaction": false,
+        "memory_failed": false,
+        "coercion_failed": false,
+        "strategy": "tau2_summarizing[agent]",
+        "original_msgs": 2,
+        "filtered_msgs": 2,
+        "original_tokens": 150,
+        "filtered_tokens": 150,
+        "compression_ratio": 1.0,
+        "summary": null,
+        "forgotten": null,
+        "summarizer_prompt_tokens": 0,
+        "summarizer_completion_tokens": 0,
+        "summarization_time_seconds": 0.0
+      }
+    },
+    {
+      "step": 1,
+      "turn_idx": 3,
+      "msg_index": 4,
+      "side": "agent",
+      "memory": {
+        "was_compacted": false,
+        "new_compaction": false,
+        "memory_failed": false,
+        "coercion_failed": false,
+        "strategy": "tau2_summarizing[agent]",
+        "original_msgs": 4,
+        "filtered_msgs": 4,
+        "original_tokens": 155,
+        "filtered_tokens": 155,
+        "compression_ratio": 1.0,
+        "summary": null,
+        "forgotten": null,
+        "summarizer_prompt_tokens": 0,
+        "summarizer_completion_tokens": 0,
+        "summarization_time_seconds": 0.0
+      }
+    },
+    {
+      "step": 2,
+      "turn_idx": 5,
+      "msg_index": 6,
+      "side": "agent",
+      "memory": {
+        "was_compacted": false,
+        "new_compaction": false,
+        "memory_failed": false,
+        "coercion_failed": false,
+        "strategy": "tau2_summarizing[agent]",
+        "original_msgs": 6,
+        "filtered_msgs": 6,
+        "original_tokens": 304,
+        "filtered_tokens": 304,
+        "compression_ratio": 1.0,
+        "summary": null,
+        "forgotten": null,
+        "summarizer_prompt_tokens": 0,
+        "summarizer_completion_tokens": 0,
+        "summarization_time_seconds": 0.0
+      }
+    },
+    {
+      "step": 3,
+      "turn_idx": 7,
+      "msg_index": 8,
+      "side": "agent",
+      "memory": {
+        "was_compacted": false,
+        "new_compaction": false,
+        "memory_failed": false,
+        "coercion_failed": false,
+        "strategy": "tau2_summarizing[agent]",
+        "original_msgs": 8,
+        "filtered_msgs": 8,
+        "original_tokens": 313,
+        "filtered_tokens": 313,
+        "compression_ratio": 1.0,
+        "summary": null,
+        "forgotten": null,
+        "summarizer_prompt_tokens": 0,
+        "summarizer_completion_tokens": 0,
+        "summarization_time_seconds": 0.0
+      }
+    },
+    {
+      "step": 4,
+      "turn_idx": 9,
+      "msg_index": 10,
+      "side": "agent",
+      "memory": {
+        "was_compacted": false,
+        "new_compaction": false,
+        "memory_failed": false,
+        "coercion_failed": false,
+        "strategy": "tau2_summarizing[agent]",
+        "original_msgs": 10,
+        "filtered_msgs": 10,
+        "original_tokens": 826,
+        "filtered_tokens": 826,
+        "compression_ratio": 1.0,
+        "summary": null,
+        "forgotten": null,
+        "summarizer_prompt_tokens": 0,
+        "summarizer_completion_tokens": 0,
+        "summarization_time_seconds": 0.0
+      }
+    },
+    {
+      "step": 0,
+      "turn_idx": 0,
+      "msg_index": 1,
+      "side": "user",
+      "memory": {
+        "was_compacted": false,
+        "new_compaction": false,
+        "memory_failed": false,
+        "coercion_failed": false,
+        "strategy": "tau2_summarizing[user]",
+        "original_msgs": 1,
+        "filtered_msgs": 1,
+        "original_tokens": 9,
+        "filtered_tokens": 9,
+        "compression_ratio": 1.0,
+        "summary": null,
+        "forgotten": null,
+        "summarizer_prompt_tokens": 0,
+        "summarizer_completion_tokens": 0,
+        "summarization_time_seconds": 0.0
+      }
+    },
+    {
+      "step": 1,
+      "turn_idx": 2,
+      "msg_index": 5,
+      "side": "user",
+      "memory": {
+        "was_compacted": false,
+        "new_compaction": false,
+        "memory_failed": false,
+        "coercion_failed": false,
+        "strategy": "tau2_summarizing[user]",
+        "original_msgs": 3,
+        "filtered_msgs": 3,
+        "original_tokens": 250,
+        "filtered_tokens": 250,
+        "compression_ratio": 1.0,
+        "summary": null,
+        "forgotten": null,
+        "summarizer_prompt_tokens": 0,
+        "summarizer_completion_tokens": 0,
+        "summarization_time_seconds": 0.0
+      }
+    }
+  ]
+}

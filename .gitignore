@@ -47,6 +47,11 @@ results/
 trajectories/
 output/
 
+# Committed test fixtures — un-ignore so the tau2 trajectory-loader
+# tests have a real captured episode to load against.
+!tests/fixtures/
+!tests/fixtures/**
+
 # Jupyter
 .ipynb_checkpoints/
 
