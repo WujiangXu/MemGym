@@ -5,22 +5,16 @@ This module provides the MemGym-compatible interface for the A-mem
 (Agentic Memory) system.
 """
 
-import sys
-from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-# Import base classes directly to avoid circular import through memory/__init__.py
-_BASE_PATH = Path(__file__).parent.parent
-if str(_BASE_PATH) not in sys.path:
-    sys.path.insert(0, str(_BASE_PATH))
+# Package-relative import: pull in the already-loaded `memgym.memory.base`
+# submodule directly, instead of the old sys.path hack. The
+# previous bare `from base import ...` only worked in dev because another
+# module had already injected src/memgym/memory/ into sys.path; in a clean
+# `pip install -e .[memory-eval]` venv it failed with "No module named 'base'".
+from ...base import BaseMemoryModel, Context, FilteredContext, MemoryAction, register_memory_model
 
-from base import BaseMemoryModel, Context, FilteredContext, MemoryAction, register_memory_model
-
-# Support both package and direct imports
-try:
-    from .system import AgenticMemorySystem
-except ImportError:
-    from system import AgenticMemorySystem
+from .system import AgenticMemorySystem
 
 
 class AMemMemoryModel(BaseMemoryModel):

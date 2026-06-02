@@ -43,6 +43,12 @@ memgym-eval-rm --dataset all --checkpoint MemGym/memgym-rm-1p7b \
     --output results/memrm_table.json
 ```
 
+> Reproduced 2026-06-01 on 1×H100 80GB (4-bit NF4), ~34 min wallclock:
+> AUROC = **0.985** (n=3007), ECE = 0.010, Cov@t = 95.9%, Acc@t = 0.985 —
+> matches the IID row above. `resolve_checkpoint` descends into
+> `checkpoint-500/` automatically, so the documented `--checkpoint
+> MemGym/memgym-rm-1p7b` form works without a `subfolder=` workaround.
+
 Registered `--dataset` short names: `iid-heldout`, `train-sanity`,
 `scenario-ood-tau2`, `scenario-ood-wa-long`, `scenario-ood-webarena`,
 `strategy-ood` (see [data.md](data.md#2-memrm-out-of-distribution-eval-splits)).

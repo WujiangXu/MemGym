@@ -1,0 +1,23 @@
+# HippoRAG (knowledge-graph + Personalized PageRank) runtime deps.
+#
+# Install with: pip install -r requirements-hipporag.txt
+#                 (equivalent: pip install -e ".[hipporag]")
+#
+# Used in:
+#   - MemGym-CodeQA (`memgym.pipelines.coding_synthetic`, --method hipporag)
+#   - MemGym-DR    (`memgym.pipelines.memgym_ir`, --strategies ir_hipporag)
+#
+# WARNING — venv layout:
+# HippoRAG 2.0.0a4 pins `litellm==1.73.1`, `vllm==0.6.6.post1`,
+# `transformers==4.45.2`, and `openai==1.91.1`. These pins are
+# INCOMPATIBLE with `[tau2]` (litellm>=1.80.15), `[openhands]`
+# (litellm==1.84.1), and `[rl-way-a]` (vllm>=0.7.0). Install HippoRAG in
+# a venv that does NOT include those extras. CodeQA + DR + A-MEM +
+# SimpleMem + Mem0 coexist fine alongside HippoRAG in the same venv.
+#
+# The SimpleMem adapter at src/memgym/memory/external/simplemem/system.py
+# already falls back from Qwen3-Embedding-0.6B (needs transformers>=4.50)
+# to the ubiquitous MiniLM-L6-v2 when HippoRAG's transformers==4.45.2
+# pin is active.
+
+hipporag>=2.0.0a4

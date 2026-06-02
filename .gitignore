@@ -47,6 +47,11 @@ results/
 trajectories/
 output/
 
+# Committed test fixtures — un-ignore so the tau2 trajectory-loader
+# tests have a real captured episode to load against.
+!tests/fixtures/
+!tests/fixtures/**
+
 # Jupyter
 .ipynb_checkpoints/
 
@@ -65,3 +70,7 @@ third_party/llmlingua-2/
 # and LightMem (now the `lightmem` pip extra — pip install 'memgym[lightmem]').
 third_party/SWE-Bench-Fork/
 third_party/LightMem/
+third_party/webarena-infinity/
+
+# Reproduction smoke-run outputs (audit-only, not paper artifacts)
+data/dr_smoke*/

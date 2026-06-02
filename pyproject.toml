@@ -150,17 +150,62 @@ lightmem = [
     "lightmem",
 ]
 
-# A-mem (Agentic Memory) extras — needed for HippoRAG, SimpleMem, Mem0
-# memory backends and the IR pipeline.
+# A-MEM (Agentic Memory) — used by CodeQA (`--method amem`), DR
+# (`--strategies ir_amem`), and SWE-Gym (`--memory swe-amem`).
+# Matches requirements-amem.txt.
 amem = [
+    "numpy>=1.24",
     "sentence-transformers>=3.0.0",
     "scikit-learn>=1.0.0",
-    "rank-bm25>=0.2.0",
+    "torch>=2.0.0",
+    "transformers>=4.30.0",
     "nltk>=3.8.0",
-    "hipporag>=2.0.0",
+    "rank-bm25>=0.2.0",
+    "openai>=1.0.0",
+    "litellm>=1.65.0",
+    "ollama>=0.1.0",
+    "rouge-score>=0.1.2",
+    "bert-score>=0.3.13",
+    "tqdm>=4.65.0",
+    "pandas>=2.0.0",
+    "python-dotenv>=1.0.0",
+]
+
+# SimpleMem (semantic structured compression) — used by CodeQA
+# (`--method simplemem`) and DR (`--strategies ir_simplemem`).
+simplemem = [
     "simplemem",
-    "mem0ai>=0.1.0",
-    "numpy>=1.24",
+]
+
+# Mem0 (LLM extract+update fact memory) — used by CodeQA (`--method mem0`)
+# and DR (`--strategies ir_mem0`). [extras] pulls llms+nlp+vector-stores
+# matching the litellm+huggingface+qdrant config in the adapter.
+mem0 = [
+    "mem0ai[extras]>=0.1.0",
+]
+
+# HippoRAG (KG + Personalized PageRank) — used by CodeQA (`--method hipporag`)
+# and DR (`--strategies ir_hipporag`).
+#
+# WARNING: HippoRAG 2.0.0a4 pins `litellm==1.73.1`, `vllm==0.6.6.post1`,
+# `transformers==4.45.2`, `openai==1.91.1`. These are INCOMPATIBLE with
+# `[tau2]` (needs litellm>=1.80.15), `[openhands]` (litellm==1.84.1),
+# and `[rl-way-a]` (vllm>=0.7.0). Install in a venv that does NOT include
+# those extras. A-MEM/SimpleMem/Mem0 coexist fine alongside HippoRAG.
+hipporag = [
+    "hipporag>=2.0.0a4",
+]
+
+# Meta-extra: A-MEM + SimpleMem + Mem0 together, plus the `datasets`
+# library used by both the CodeQA and DR pipelines for HF data loading.
+# Pulls the three backends that always co-install (no upstream pin
+# conflicts among them). HippoRAG stays opt-in (see warning above) —
+# add `[hipporag]` separately if you need it AND aren't using
+# tau2/openhands/rl-way-a in the same venv.
+memory-eval = [
+    "memgym[amem,simplemem,mem0]",
+    "datasets",
+    "huggingface-hub>=0.25.0",
 ]
 
 # WebArena (Web GUI) track.

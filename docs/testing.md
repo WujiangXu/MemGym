@@ -43,15 +43,21 @@ pytest tests/unit/test_imports.py            # expect: 4 passed
 pytest tests/unit/test_imports.py tests/unit/test_rm_eval.py \
        tests/unit/test_world_model.py tests/unit/test_memory_strategies_roundtrip.py \
        tests/unit/test_known_bugs.py tests/unit/test_memory_eval.py -q
-# expect: 64 passed, 1 xfailed
+# expect: 67 passed
 ```
 
-> The single `xfail` is a documented open contract bug (config fallback uses
-> `print()` instead of `warnings.warn` in `gym/swe_bench/env.py`). It is expected.
+> There are no `xfail`s: the config-fallback contract bug (`gym/swe_bench/env.py`
+> used `print()` instead of `warnings.warn`) is now fixed, so its `xfail` marker
+> was removed.
 
-The full `tests/unit/` run is **not** green under `[dev,eval]` alone — ~31 tests
-need the `[swe]` extra (`unidiff`, etc.). That is expected; the six files above
-are the CI surface.
+With all track extras installed, the full `tests/unit/` run reports
+**301 passed, 1 skipped, 0 xfailed** (302 collected). The lone skip is the
+API-key-gated integration test in `test_naive_summarization.py` (set
+`OPENAI_API_KEY` and `RUN_INTEGRATION_TESTS=1` to include it). On `[dev,eval]`
+alone, the `[swe]`-only tests (`minisweagent`/`unidiff`, etc.) self-skip via
+`pytest.importorskip`; the tau2 trajectory-loader tests run against the
+committed fixture at `tests/fixtures/trajectories/tau2_bench_run/` and self-skip
+only if it is removed.
 
 ---
 
@@ -90,9 +96,10 @@ The registry should include the paper's baselines:
 the optional dependency is installed — see Caveats.
 
 **Caveats for Tier 1:**
-- `webarena --list_apps` / `--list_memory_models` are **not** zero-cost: `main()`
-  resolves the WebArena-Infinity directory before those flags short-circuit, so
-  they need WebArena installed. Only `webarena --help` is a true no-dep smoke.
+- `webarena --list_memory_models` **is** zero-cost: `main()` short-circuits and
+  prints the registry before resolving the WebArena-Infinity directory, so no
+  checkout is needed. `webarena --list_apps`, however, **does** need WebArena
+  installed — it resolves the clone to enumerate apps.
 - `coding_synthetic --help` and `examples/memgym_dr/run_ir_benchmark.py --help` import
   `unidiff` / `tenacity` at module load, so they need the `[swe]` extra even just
   to print help. See Tier 3.

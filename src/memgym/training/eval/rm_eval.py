@@ -155,6 +155,26 @@ def looks_like_hf_repo_id(value: str) -> bool:
     return len(parts) == 2 and all(parts)
 
 
+def _resolve_adapter_root(root: Path) -> Path:
+    """Return the dir holding ``adapter_config.json``.
+
+    Prefer the snapshot root itself. If the adapter is only present under
+    a ``checkpoint-NNN/`` subdir (a training resume layout), return the
+    highest-numbered one. The published ``MemGym/memgym-rm-1p7b`` repo
+    has its adapter under ``checkpoint-500/`` only — so the documented
+    ``--checkpoint MemGym/memgym-rm-1p7b`` form has to look one level down.
+    """
+    if (root / "adapter_config.json").exists():
+        return root
+    subdirs = sorted(
+        (d for d in root.glob("checkpoint-*") if (d / "adapter_config.json").exists()),
+        key=lambda d: int(d.name.split("-")[-1]) if d.name.split("-")[-1].isdigit() else -1,
+    )
+    if subdirs:
+        return subdirs[-1]
+    return root
+
+
 def resolve_checkpoint(
     checkpoint: str,
     *,
@@ -163,13 +183,15 @@ def resolve_checkpoint(
 ) -> Path:
     """Return a local directory for the MemRM checkpoint.
 
-    If ``checkpoint`` is a local path, return it unchanged. If it looks
-    like an HF repo ID (``MemGym/memgym-rm-1p7b``), download via
-    ``snapshot_download`` and return the cache path.
+    If ``checkpoint`` is a local path, return it unchanged (after
+    descending into a ``checkpoint-NNN/`` subdir when the adapter
+    only lives there). If it looks like an HF repo ID
+    (``MemGym/memgym-rm-1p7b``), download via ``snapshot_download``
+    and return the resolved adapter dir.
     """
     path = Path(checkpoint)
     if path.exists():
-        return path
+        return _resolve_adapter_root(path)
     if not looks_like_hf_repo_id(checkpoint):
         raise FileNotFoundError(
             f"checkpoint {checkpoint!r} is neither an existing path nor a "
@@ -184,7 +206,7 @@ def resolve_checkpoint(
         token=hf_token,
         cache_dir=cache_dir,
     )
-    return Path(local_dir)
+    return _resolve_adapter_root(Path(local_dir))
 
 
 def resolve_dataset(

@@ -1,0 +1,15 @@
+# Mem0 (LLM extract+update fact memory) runtime deps.
+#
+# Install with: pip install -r requirements-mem0.txt
+#                 (equivalent: pip install -e ".[mem0]")
+#
+# Used in:
+#   - MemGym-CodeQA (`memgym.pipelines.coding_synthetic`, --method mem0)
+#   - MemGym-DR    (`memgym.pipelines.memgym_ir`, --strategies ir_mem0)
+#
+# The memgym adapter at src/memgym/memory/external/mem0/system.py uses
+# `provider="litellm"` (LLM), `provider="huggingface"` (embedder), and
+# `provider="qdrant"` (vector store), so mem0ai's `[llms,nlp,vector-stores]`
+# extras must be active. mem0ai's [extras] meta pulls all three.
+
+mem0ai[extras]>=0.1.0

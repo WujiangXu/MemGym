@@ -31,5 +31,5 @@ gymnasium>=1.2.2
 
 # Install tau2-bench package (run from MemGym root):
 # python -m memgym.gym.tau2_bench.install --venv /path/to/venv
-# (clones sierra-research/tau2-bench at pinned SHA into third_party/tau2-bench
+# (clones sierra-research/tau2-bench at pinned SHA fcc9ed6 into third_party/tau2-bench
 #  then pip installs -e . into the chosen venv. Idempotent — safe to re-run.)

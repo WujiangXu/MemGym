@@ -1,16 +1,27 @@
 """Round-trip tests for the tau2 trajectory loader + compaction extractor.
 
-Fixture is a real episode captured on 2026-04-15 via
-``Tau2BenchRunner`` (retail task 0, ms10_kf1_kl2_r0.6, memory_side=both).
-The invariants we pin here are the cross-side contract between runner and
-world-memory trainer: event counts and msg_index roles must round-trip
-exactly, or the downstream training dataset silently mislabels examples.
+Fixture is a real episode captured via ``Tau2BenchRunner`` (retail task 0,
+ms10_kf1_kl2_r0.6, memory_side=both). The invariants pinned here are the
+cross-side contract between runner and world-memory trainer: event counts
+and msg_index roles must round-trip exactly, or the downstream training
+dataset silently mislabels examples.
+
+The captured-episode fixture is committed under
+`tests/fixtures/trajectories/tau2_bench_run/`, so these tests run by default.
+The module-level `skipif` is a safety net: if that fixture is ever removed (or
+while regenerating it), the suite skips cleanly instead of failing, so
+`pytest tests/unit` stays green. To regenerate, run a `Tau2BenchRunner`
+retail-task-0 episode with `memory_side=both, max_steps=10, kf=1, kl=2, r=0.6`,
+strategy=tau2_summarizing, and copy the run dir under
+`tests/fixtures/trajectories/tau2_bench_run/memory/retail/0/`.
 """
 from __future__ import annotations
 
 import json
 import unittest
 from pathlib import Path
+
+import pytest
 
 from memgym.training.data.compaction import (
     Tau2CompactionEvent,
@@ -26,6 +37,15 @@ from memgym.training.data.loader import (
 
 FIXTURE_ROOT = Path(__file__).parent.parent / "fixtures" / "trajectories" / "tau2_bench_run"
 RETAIL_TASK_DIR = FIXTURE_ROOT / "memory" / "retail" / "0"
+
+pytestmark = pytest.mark.skipif(
+    not (RETAIL_TASK_DIR / "result.json").exists(),
+    reason=(
+        "tau2 captured-episode fixture missing (it is normally committed; "
+        "this only trips if it was removed or is being regenerated). "
+        "Regenerate with `Tau2BenchRunner` retail task 0; see module docstring."
+    ),
+)
 
 
 class TestTau2TrajectoryLoader(unittest.TestCase):

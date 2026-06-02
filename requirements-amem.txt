@@ -1,31 +1,34 @@
-# A-mem (Agentic Memory) dependencies
+# A-MEM (Agentic Memory) runtime deps.
+#
 # Install with: pip install -r requirements-amem.txt
+#                 (equivalent: pip install -e ".[amem]")
+#
+# A-MEM is used in:
+#   - MemGym-CodeQA (`memgym.pipelines.coding_synthetic`, --method amem)
+#   - MemGym-DR    (`memgym.pipelines.memgym_ir`, --strategies ir_amem)
+#   - SWE-Gym       (`gym/swe_bench`, --memory swe-amem)
+#
+# Other external memory backends used by CodeQA/DR ship as their own
+# extras, since their upstream packages pin transitive deps that would
+# cannibalize the venv if pulled by default. See:
+#   - requirements-hipporag.txt  ([hipporag] — INCOMPATIBLE with [tau2]/[openhands])
+#   - requirements-simplemem.txt ([simplemem])
+#   - requirements-mem0.txt      ([mem0])
+# A `[memory-eval]` meta-extra pulls A-MEM + SimpleMem + Mem0 together for
+# convenience (HippoRAG stays opt-in due to its conflicts).
 
-# Core A-mem dependencies
+numpy>=1.24
 sentence-transformers>=3.0.0
 scikit-learn>=1.0.0
-rank-bm25>=0.2.0
+torch>=2.0.0
+transformers>=4.30.0
 nltk>=3.8.0
-
-# HippoRAG (knowledge-graph + Personalized PageRank) — used by both
-# `--method hipporag` (coding-synthetic) and `ir_hipporag` (IR pipeline).
-# Pulls networkx + igraph (PPR), transformers, openai client.
-hipporag>=2.0.0
-
-# SimpleMem (semantic structured compression) — used by both `--method
-# simplemem` (coding-synthetic) and `ir_simplemem` (IR pipeline).
-# Pulls lancedb (~80 MB), pydantic, sqlalchemy.
-simplemem
-
-# Mem0 (LLM extract+update fact memory) — used by both `--method mem0`
-# (coding-synthetic) and `ir_mem0` (IR pipeline). Uses LiteLLM provider
-# under the hood, embeds via HuggingFace, stores facts in local Qdrant.
-mem0ai>=0.1.0
-
-# MemoryBank (vendored Ebbinghaus decay + reinforcement) — algorithm is
-# vendored at memgym/memory/memorybank_core/, so the only runtime deps
-# are sentence-transformers (already pinned above) and numpy.
-numpy>=1.24
-
-# Already in main requirements.txt:
-# litellm, numpy, tqdm
+rank-bm25>=0.2.0
+openai>=1.0.0
+litellm>=1.65.0
+ollama>=0.1.0
+rouge-score>=0.1.2
+bert-score>=0.3.13
+tqdm>=4.65.0
+pandas>=2.0.0
+python-dotenv>=1.0.0

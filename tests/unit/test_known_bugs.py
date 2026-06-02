@@ -144,10 +144,6 @@ def test_sliding_window_summary_emits_user_role():
 # Bug 4 — swe_env config fallback must use warnings.warn, not print
 # ---------------------------------------------------------------------------
 
-@pytest.mark.xfail(
-    strict=False,
-    reason="env.py:677 still uses print() — fix should switch to warnings.warn so the silent fallback is visible to pytest's -W flag",
-)
 def test_swe_env_config_fallback_uses_warnings_module(monkeypatch):
     """Fallback to empty env config must emit a Python warning.
 

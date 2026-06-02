@@ -6,10 +6,14 @@ Reads summary.json from each strategy's output directory and prints
 a comparison table with resolve rates, compression ratios, and costs.
 
 Usage:
-    python scripts/compare_results.py results/comparison_20250204_120000
-    python scripts/compare_results.py results/comparison_*  # latest
+    python examples/swe_bench/compare.py results/comparison_20250204_120000
+
+Takes exactly one results directory (one subdir per strategy). To pick the
+latest run, expand the glob yourself and pass a single path, e.g.:
+    python examples/swe_bench/compare.py "$(ls -dt results/comparison_* | head -1)"
 """
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -132,19 +136,29 @@ def print_instance_breakdown(results: dict):
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python scripts/compare_results.py <results_directory>")
-        print("Example: python scripts/compare_results.py results/comparison_20250204_120000")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(
+        description=(
+            "Compare SWE-bench results across memory strategies. "
+            "Reads <results_dir>/<strategy>/summary.json and prints a "
+            "per-instance + total resolve-rate table."
+        ),
+    )
+    parser.add_argument(
+        "results_dir",
+        type=Path,
+        help=(
+            "Directory containing one subdir per strategy, each with a "
+            "summary.json. e.g. results/comparison_20250204_120000"
+        ),
+    )
+    args = parser.parse_args()
 
-    base_dir = Path(sys.argv[1])
-    if not base_dir.exists():
-        print(f"ERROR: Directory not found: {base_dir}")
-        sys.exit(1)
+    if not args.results_dir.exists():
+        parser.error(f"Directory not found: {args.results_dir}")
 
-    results = load_strategy_results(base_dir)
+    results = load_strategy_results(args.results_dir)
     if not results:
-        print(f"No summary.json files found in {base_dir}/*/")
+        print(f"No summary.json files found in {args.results_dir}/*/")
         sys.exit(1)
 
     print(f"Found {len(results)} strategies: {', '.join(results.keys())}")

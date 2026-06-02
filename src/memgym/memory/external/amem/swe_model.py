@@ -14,23 +14,15 @@ This model is optimized for:
 - Code-aware query generation
 """
 
-import sys
-from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-# Import base classes directly to avoid circular import
-_BASE_PATH = Path(__file__).parent.parent
-if str(_BASE_PATH) not in sys.path:
-    sys.path.insert(0, str(_BASE_PATH))
+# Package-relative import; see model.py for the rationale (the previous
+# sys.path / `from base import ...` form only worked in dev venvs and broke
+# in a clean `pip install -e .[memory-eval]` install).
+from ...base import Context, MemoryAction, register_memory_model
 
-from base import Context, MemoryAction, register_memory_model
-
-try:
-    from .model import AMemMemoryModel
-    from .system import AgenticMemorySystem
-except ImportError:
-    from model import AMemMemoryModel
-    from system import AgenticMemorySystem
+from .model import AMemMemoryModel
+from .system import AgenticMemorySystem
 
 
 # SWE-specific query generation prompt

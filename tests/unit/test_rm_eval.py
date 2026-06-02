@@ -23,10 +23,45 @@ from memgym.training.eval.rm_eval import (
     format_results_table,
     load_rows,
     looks_like_hf_repo_id,
+    resolve_checkpoint,
     resolve_dataset,
     run_predictions,
 )
 from memgym.training.models.evaluator import PredictionResult, compute_metrics
+
+
+class TestResolveCheckpoint:
+    """Covers the published `MemGym/memgym-rm-1p7b` layout (adapter under
+    `checkpoint-500/`), plus a root-level adapter and a multi-resume layout."""
+
+    def test_root_level_adapter(self, tmp_path: Path):
+        (tmp_path / "adapter_config.json").write_text("{}")
+        assert resolve_checkpoint(str(tmp_path)) == tmp_path
+
+    def test_subfolder_only(self, tmp_path: Path):
+        sub = tmp_path / "checkpoint-500"
+        sub.mkdir()
+        (sub / "adapter_config.json").write_text("{}")
+        assert resolve_checkpoint(str(tmp_path)) == sub
+
+    def test_multiple_subfolders_picks_highest(self, tmp_path: Path):
+        for nnn in (100, 500, 250):
+            sub = tmp_path / f"checkpoint-{nnn}"
+            sub.mkdir()
+            (sub / "adapter_config.json").write_text("{}")
+        assert resolve_checkpoint(str(tmp_path)) == tmp_path / "checkpoint-500"
+
+    def test_root_wins_over_subfolder(self, tmp_path: Path):
+        (tmp_path / "adapter_config.json").write_text("{}")
+        sub = tmp_path / "checkpoint-500"
+        sub.mkdir()
+        (sub / "adapter_config.json").write_text("{}")
+        assert resolve_checkpoint(str(tmp_path)) == tmp_path
+
+    def test_no_adapter_returns_root(self, tmp_path: Path):
+        # Caller can still pass a dir with no adapter (e.g. base-model-only
+        # diagnostic); resolver shouldn't raise here.
+        assert resolve_checkpoint(str(tmp_path)) == tmp_path
 
 
 class StubMemRM:

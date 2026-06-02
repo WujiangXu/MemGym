@@ -35,7 +35,7 @@ mask install-path bugs the CI install is meant to catch.
 |---|---|---|
 | 1 | `pytest tests/unit/test_imports.py` | 4 passed |
 | 2 | `python -m memgym.gym.tau2_bench --help` | exits 0; argparse prints `--domains`, `--task_ids`, `--task_split_name` |
-| 3 | `python -m memgym.gym.tau2_bench.install --help` | **eagerly runs `pip install`** instead of parsing `--help` — see known issues below |
+| 3 | `python -m memgym.gym.tau2_bench.install --help` | exits 0; argparse prints `--venv` and the pinned-SHA description (no eager clone/install) |
 | 4 | `python -m memgym.gym.swe_bench --help` | exits 0; argparse prints `--dataset {lite,verified,full,swe-gym,swe-smith}`, `--slice` |
 | 5 | `python examples/swe_bench/evaluate_swe_bench.py --help` | exits 0; matches the module form |
 | 6 | `python -m memgym.gym.webarena --help` | exits 0; argparse prints `--webarena_dir`, `--app_name`, `--task_ids` |
@@ -51,28 +51,25 @@ pytest tests/unit/test_imports.py tests/unit/test_rm_eval.py \
        tests/unit/test_known_bugs.py tests/unit/test_memory_eval.py -q
 ```
 
-→ **64 passed, 1 xfailed in 6.65s**.
+→ **67 passed** (0 xfailed).
 
-The xfail is the documented open contract bug in
-`gym/swe_bench/env.py` (config fallback uses `print()` instead of
-`warnings.warn`). All five known-bug regression tests pass; the xfail is
-the sixth.
+The previously-documented `xfail` (config fallback in `gym/swe_bench/env.py`
+used `print()` instead of `warnings.warn`) is now fixed and its marker removed,
+so all six files pass with no expected failures.
 
 ## Known issues surfaced by the smoke run
 
-1. **`python -m memgym.gym.tau2_bench.install --help` is not a true
-   `--help`.** The module runs the install pipeline immediately on
-   import; argparse never gets to intercept the `--help` flag. This is
-   a usability bug in the installer, not a release blocker — the
-   documented form `python -m memgym.gym.tau2_bench.install --venv
-   <path>` works. Tracking: noted for a future PR.
-2. **`tests/unit/` (whole-suite invocation) is not green under
-   `[dev,eval]` only.** ~31 tests in the suite depend on extras outside
-   the CI install (`unidiff` from `[swe]`, the legacy
-   `replay_swe_bench` module, etc.). These are *not* regressions — they
-   test code paths the reviewer-readiness surface does not exercise.
-   The release-critical subset above (six files, 64 + 1 xfail) is what
-   CI runs.
+1. **`python -m memgym.gym.tau2_bench.install --help`** *(resolved)*. The
+   installer now parses args with `argparse`, so `--help` prints usage and
+   exits without cloning or installing anything. The documented
+   `python -m memgym.gym.tau2_bench.install --venv <path>` form still works.
+2. **Whole-suite `pytest tests/unit -q`**: with all track extras installed,
+   301 passed, 1 skipped, 0 xfailed (302 collected). The lone skip is the
+   API-key-gated integration test in `test_naive_summarization.py`. On
+   `[dev,eval]` alone, the `[swe]`-only tests (`minisweagent`/`unidiff`, etc.)
+   self-skip via `pytest.importorskip`; the tau2 trajectory-loader tests run
+   against the committed fixture at `tests/fixtures/trajectories/tau2_bench_run/`
+   and self-skip only if it is removed.
 3. **stderr noise from optional deps.** `litellm` warns about missing
    `botocore` and `memgym.pipelines.memgym_ir.ir_amem` warns about
    missing `sentence_transformers`. Both are optional, both are

@@ -347,15 +347,24 @@ class TestConfigFallbackWarning:
         assert idx != -1, "_get_mini_swe_config method not found"
         method_source = source[idx:idx + 1500]
 
-        assert "WARNING" in method_source, (
-            "_get_mini_swe_config does not print WARNING on fallback to default.yaml"
+        assert "warnings.warn" in method_source, (
+            "_get_mini_swe_config silently falls back to default.yaml "
+            "(expected warnings.warn(...))"
         )
         assert "default.yaml" in method_source, (
             "_get_mini_swe_config does not mention default.yaml in warning"
         )
 
     def test_get_env_config_warns_when_not_found(self):
-        """_get_env_config should warn when swebench.yaml not found."""
+        """_get_env_config should warn when swebench.yaml not found.
+
+        Source-grep check that a warning IS issued on the fallback path.
+        The companion behavioral test
+        `test_known_bugs.py::test_swe_env_config_fallback_uses_warnings_module`
+        asserts the *correct* mechanism (`warnings.warn`, surfacing through
+        pytest's warning capture); this one just guarantees no silent
+        regression to `return {}` with nothing logged.
+        """
         swe_env_path = os.path.join(
             os.path.dirname(__file__), "..", "..", "src", "memgym", "gym", "swe_bench", "env.py"
         )
@@ -367,8 +376,9 @@ class TestConfigFallbackWarning:
         method_end = source.find("\n    def ", idx + 1)
         method_source = source[idx:method_end]
 
-        assert "WARNING" in method_source, (
-            "_get_env_config does not print WARNING when swebench.yaml not found"
+        assert "warnings.warn" in method_source, (
+            "_get_env_config silently falls back when swebench.yaml not found "
+            "(expected warnings.warn(...))"
         )
 
     def test_get_model_config_warns_when_not_found(self):
@@ -384,8 +394,9 @@ class TestConfigFallbackWarning:
         method_end = source.find("\n    def ", idx + 1)
         method_source = source[idx:method_end]
 
-        assert "WARNING" in method_source, (
-            "_get_model_config does not print WARNING when swebench.yaml not found"
+        assert "warnings.warn" in method_source, (
+            "_get_model_config silently falls back when swebench.yaml not found "
+            "(expected warnings.warn(...))"
         )
 
 # ============================================================================
