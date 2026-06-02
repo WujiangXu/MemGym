@@ -14,6 +14,22 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+# Resolve the interpreter to use for verification. Prefer a local venv
+# (`.venv/bin/python`), then `python3`, then `python`. Some hosts have
+# only `python3` on PATH, so plain `python` would fail the verification
+# footer even though `uv pip install` succeeded.
+if [ -x ".venv/bin/python" ]; then
+    VENV_PY=".venv/bin/python"
+elif command -v python3 &> /dev/null; then
+    VENV_PY="python3"
+elif command -v python &> /dev/null; then
+    VENV_PY="python"
+else
+    echo -e "${RED}No python interpreter found. Install Python 3.10+ first.${NC}"
+    exit 1
+fi
+echo -e "${GREEN}Using Python: ${VENV_PY}${NC}"
+
 # Check if uv is installed
 if ! command -v uv &> /dev/null; then
     echo -e "${YELLOW}UV not found. Installing UV...${NC}"
@@ -73,6 +89,8 @@ fi
 echo -e "\n${GREEN}[1/X] Installing MemGym core requirements...${NC}"
 uv pip install -r requirements.txt
 
+MISSING_CLONES=()
+
 # Install tau2-bench
 if [ "$INSTALL_TAU2" = true ]; then
     echo -e "\n${GREEN}[2/X] Installing tau2-bench requirements...${NC}"
@@ -86,7 +104,10 @@ if [ "$INSTALL_TAU2" = true ]; then
         echo -e "${GREEN}✓ tau2-bench installed${NC}"
     else
         echo -e "${RED}✗ third_party/tau2-bench not found${NC}"
-        echo "Please clone tau2-bench into third_party/"
+        echo "  Clone it manually with:"
+        echo "    git clone https://github.com/sierra-research/tau2-bench.git third_party/tau2-bench"
+        echo "  then re-run install.sh --tau2 (or --all)."
+        MISSING_CLONES+=("tau2-bench")
     fi
 fi
 
@@ -132,7 +153,12 @@ if [ "$INSTALL_OPENHANDS" = true ]; then
         echo -e "${GREEN}✓ OpenHands installed${NC}"
     else
         echo -e "${RED}✗ third_party/OpenHands not found${NC}"
-        echo "Run: git clone https://github.com/All-Hands-AI/OpenHands.git third_party/OpenHands"
+        echo "  Clone it manually with:"
+        echo "    git clone https://github.com/All-Hands-AI/OpenHands.git third_party/OpenHands"
+        echo "  then re-run install.sh --openhands (or --all)."
+        echo "  Note: the MemGym CodeAct wrapper currently targets the legacy"
+        echo "  openhands.core/events API and is incompatible with openhands-ai>=1.7.0."
+        MISSING_CLONES+=("OpenHands")
     fi
 fi
 
@@ -140,13 +166,9 @@ fi
 echo -e "\n${GREEN}[FINAL] Installing MemGym in editable mode...${NC}"
 uv pip install -e .
 
-echo -e "\n${GREEN}=================================="
-echo "✓ Installation Complete!"
-echo "==================================${NC}"
-
 # Verification
 echo -e "\n${YELLOW}Verifying installation...${NC}"
-python -c "
+"$VENV_PY" -c "
 import sys
 sys.path.insert(0, 'src')
 
@@ -163,8 +185,8 @@ except Exception as e:
     sys.exit(1)
 "
 
-if [ "$INSTALL_TAU2" = true ]; then
-    python -c "
+if [ "$INSTALL_TAU2" = true ] && [ -d "third_party/tau2-bench" ]; then
+    "$VENV_PY" -c "
 import sys
 try:
     import tau2
@@ -172,11 +194,11 @@ try:
 except ImportError:
     print('✗ tau2-bench not available')
     sys.exit(1)
-" || true
+"
 fi
 
 if [ "$INSTALL_SWE" = true ]; then
-    python -c "
+    "$VENV_PY" -c "
 import sys
 try:
     import minisweagent
@@ -190,11 +212,11 @@ try:
     print('✓ SWE-bench available (optional)')
 except ImportError:
     print('⚠ SWE-bench not available (optional)')
-" || true
+"
 fi
 
-if [ "$INSTALL_OPENHANDS" = true ]; then
-    python -c "
+if [ "$INSTALL_OPENHANDS" = true ] && [ -d "third_party/OpenHands" ]; then
+    "$VENV_PY" -c "
 import sys
 try:
     import openhands
@@ -202,8 +224,24 @@ try:
 except ImportError:
     print('✗ OpenHands not available')
     sys.exit(1)
-" || true
+"
 fi
+
+# Honest exit: if --tau2/--openhands/--all was requested but the upstream
+# clone is missing, the install is INCOMPLETE — fail loudly so CI catches it.
+if [ ${#MISSING_CLONES[@]} -ne 0 ]; then
+    echo -e "\n${RED}=================================="
+    echo "✗ Installation INCOMPLETE"
+    echo "==================================${NC}"
+    echo -e "${RED}Missing third-party clones: ${MISSING_CLONES[*]}${NC}"
+    echo "See the clone commands printed above. install.sh does NOT clone"
+    echo "third-party repos for you — pre-clone them under third_party/ first."
+    exit 1
+fi
+
+echo -e "\n${GREEN}=================================="
+echo "✓ Installation Complete!"
+echo "==================================${NC}"
 
 echo -e "\n${GREEN}Next steps:${NC}"
 echo "  1. Set API key: export OPENAI_API_KEY='your-key'"
