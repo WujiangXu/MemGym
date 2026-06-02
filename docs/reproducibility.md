@@ -51,12 +51,11 @@ pytest tests/unit/test_imports.py tests/unit/test_rm_eval.py \
        tests/unit/test_known_bugs.py tests/unit/test_memory_eval.py -q
 ```
 
-→ **64 passed, 1 xfailed in 6.65s**.
+→ **66 passed, 1 xfailed**.
 
 The xfail is the documented open contract bug in
 `gym/swe_bench/env.py` (config fallback uses `print()` instead of
-`warnings.warn`). All five known-bug regression tests pass; the xfail is
-the sixth.
+`warnings.warn`). All known-bug regression tests pass; the xfail is one extra.
 
 ## Known issues surfaced by the smoke run
 
@@ -66,13 +65,11 @@ the sixth.
    a usability bug in the installer, not a release blocker — the
    documented form `python -m memgym.gym.tau2_bench.install --venv
    <path>` works. Tracking: noted for a future PR.
-2. **`tests/unit/` (whole-suite invocation) is not green under
-   `[dev,eval]` only.** ~31 tests in the suite depend on extras outside
-   the CI install (`unidiff` from `[swe]`, the legacy
-   `replay_swe_bench` module, etc.). These are *not* regressions — they
-   test code paths the reviewer-readiness surface does not exercise.
-   The release-critical subset above (six files, 64 + 1 xfail) is what
-   CI runs.
+2. **Whole-suite `pytest tests/unit -q` on `[dev,eval]`**: 286 passed,
+   15 skipped, 1 xfailed. The skips are tau2 trajectory-loader tests
+   that need a captured-episode fixture (not committed; regenerate
+   locally per the docstring at `tests/unit/test_tau2_trajectory_loader.py`).
+   The rest of the suite is green without extras beyond `[dev,eval]`.
 3. **stderr noise from optional deps.** `litellm` warns about missing
    `botocore` and `memgym.pipelines.memgym_ir.ir_amem` warns about
    missing `sentence_transformers`. Both are optional, both are

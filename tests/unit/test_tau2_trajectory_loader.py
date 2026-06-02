@@ -1,16 +1,26 @@
 """Round-trip tests for the tau2 trajectory loader + compaction extractor.
 
-Fixture is a real episode captured on 2026-04-15 via
-``Tau2BenchRunner`` (retail task 0, ms10_kf1_kl2_r0.6, memory_side=both).
-The invariants we pin here are the cross-side contract between runner and
-world-memory trainer: event counts and msg_index roles must round-trip
-exactly, or the downstream training dataset silently mislabels examples.
+Fixture is a real episode captured via ``Tau2BenchRunner`` (retail task 0,
+ms10_kf1_kl2_r0.6, memory_side=both). The invariants pinned here are the
+cross-side contract between runner and world-memory trainer: event counts
+and msg_index roles must round-trip exactly, or the downstream training
+dataset silently mislabels examples.
+
+When the fixture tree is absent (fresh clones don't ship the ~MB of
+captured-episode JSON), the suite skips cleanly rather than failing —
+contributors without a tau2 capture can still run `pytest tests/unit`.
+To regenerate the fixture locally, run a `Tau2BenchRunner` retail-task-0
+episode with `memory_side=both, max_steps=10, kf=1, kl=2, r=0.6`,
+strategy=tau2_summarizing, and copy the run dir under
+`tests/fixtures/trajectories/tau2_bench_run/memory/retail/0/`.
 """
 from __future__ import annotations
 
 import json
 import unittest
 from pathlib import Path
+
+import pytest
 
 from memgym.training.data.compaction import (
     Tau2CompactionEvent,
@@ -26,6 +36,15 @@ from memgym.training.data.loader import (
 
 FIXTURE_ROOT = Path(__file__).parent.parent / "fixtures" / "trajectories" / "tau2_bench_run"
 RETAIL_TASK_DIR = FIXTURE_ROOT / "memory" / "retail" / "0"
+
+pytestmark = pytest.mark.skipif(
+    not (RETAIL_TASK_DIR / "result.json").exists(),
+    reason=(
+        "tau2 captured-episode fixture is not committed (~MB of JSON). "
+        "Regenerate with `Tau2BenchRunner` retail task 0; see module "
+        "docstring for parameters."
+    ),
+)
 
 
 class TestTau2TrajectoryLoader(unittest.TestCase):

@@ -253,7 +253,17 @@ class TestFinalStepObservation(unittest.TestCase):
         mock_env = MagicMock()
         memory = PassThroughMemory()
 
-        agent = MemoryAwareSWEAgent(mock_model, mock_env, memory)
+        # mini-swe-agent>=2.3.0's AgentConfig (pydantic) requires both
+        # system_template and instance_template — supply minimal placeholders
+        # so DefaultAgent.__init__ doesn't raise. We never call .run() here,
+        # so template content is irrelevant.
+        agent = MemoryAwareSWEAgent(
+            mock_model,
+            mock_env,
+            memory,
+            system_template="system",
+            instance_template="instance",
+        )
         agent.messages = messages
         agent._task_description = "Test task"
         return agent

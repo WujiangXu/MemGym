@@ -43,15 +43,17 @@ pytest tests/unit/test_imports.py            # expect: 4 passed
 pytest tests/unit/test_imports.py tests/unit/test_rm_eval.py \
        tests/unit/test_world_model.py tests/unit/test_memory_strategies_roundtrip.py \
        tests/unit/test_known_bugs.py tests/unit/test_memory_eval.py -q
-# expect: 64 passed, 1 xfailed
+# expect: 66 passed, 1 xfailed
 ```
 
 > The single `xfail` is a documented open contract bug (config fallback uses
 > `print()` instead of `warnings.warn` in `gym/swe_bench/env.py`). It is expected.
 
-The full `tests/unit/` run is **not** green under `[dev,eval]` alone — ~31 tests
-need the `[swe]` extra (`unidiff`, etc.). That is expected; the six files above
-are the CI surface.
+The full `tests/unit/` run on `[dev,eval]` reports
+**286 passed, 15 skipped, 1 xfailed**. The 15 skips are tau2 trajectory-loader
+tests that need a captured-episode fixture (regenerate locally per the
+docstring at `tests/unit/test_tau2_trajectory_loader.py`); the rest of the
+suite is green without extras beyond `[dev,eval]`.
 
 ---
 
